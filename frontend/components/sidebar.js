@@ -9,7 +9,6 @@ function Sidebar({ active }) {
 
   const navItems = [
     { href: 'dashboard.html',    icon: 'bi-grid-fill',           label: 'Dashboard' },
-    { href: 'transactions.html', icon: 'bi-arrow-left-right',    label: 'Transações' },
     { href: 'categories.html',   icon: 'bi-tag-fill',            label: 'Categorias' },
     { href: 'profile.html',      icon: 'bi-bar-chart-line-fill', label: 'Perfil Investidor' },
   ];

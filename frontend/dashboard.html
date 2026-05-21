@@ -27,7 +27,7 @@
   <script src="components/sidebar.js"></script>
 
   <script type="text/babel">
-    const { useState, useEffect, useCallback } = React;
+    const { useState, useEffect, useCallback, useMemo } = React;
     const user = storage.getUser();
 
     function Dashboard() {
@@ -36,20 +36,26 @@
       const [year,         setYear]         = useState(now.getFullYear());
       const [summary,      setSummary]      = useState(null);
       const [transactions, setTransactions] = useState([]);
+      const [categories,   setCategories]   = useState([]);
       const [loading,      setLoading]      = useState(true);
+      const [filterType,   setFilterType]   = useState('ALL');
+      const [filterCat,    setFilterCat]    = useState('');
 
       const load = useCallback(async () => {
         setLoading(true);
         try {
-          const [s, t] = await Promise.all([
+          const [s, t, c] = await Promise.all([
             api.get(`/transactions/summary?userId=${user.id}&month=${month}&year=${year}`),
-            api.get(`/transactions?userId=${user.id}&month=${month}&year=${year}`)
+            api.get(`/transactions?userId=${user.id}&month=${month}&year=${year}`),
+            api.get(`/categories?userId=${user.id}`)
           ]);
           setSummary(s);
-          setTransactions(t.slice(0, 5));
+          setTransactions(t);
+          setCategories(c);
         } catch {
           setSummary(null);
           setTransactions([]);
+          setCategories([]);
         } finally {
           setLoading(false);
         }
@@ -59,6 +65,24 @@
 
       function prevMonth() { if (month === 1) { setMonth(12); setYear(y => y - 1); } else setMonth(m => m - 1); }
       function nextMonth() { if (month === 12) { setMonth(1); setYear(y => y + 1); } else setMonth(m => m + 1); }
+
+      const filtered = useMemo(() => {
+        return transactions.filter(t => {
+          const typeOk = filterType === 'ALL' || t.type === filterType;
+          const catOk  = !filterCat || String(t.categoryId) === filterCat;
+          return typeOk && catOk;
+        });
+      }, [transactions, filterType, filterCat]);
+
+      const availableCats = useMemo(() => {
+        if (filterType === 'ALL') return categories;
+        return categories.filter(c => c.type === filterType);
+      }, [categories, filterType]);
+
+      function handleTypeFilter(type) {
+        setFilterType(type);
+        setFilterCat('');
+      }
 
       return (
         <div className="app-layout">
@@ -102,21 +126,46 @@
                 </div>
 
                 <div className="card-section">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h2 className="section-title mb-0">Últimas transações</h2>
-                    <a href="transactions.html" className="btn btn-sm btn-primary-custom">Ver todas</a>
+                  <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <h2 className="section-title mb-0">Transações</h2>
+                    <div className="d-flex align-items-center gap-2 flex-wrap">
+                      <div className="d-flex gap-1">
+                        {[
+                          { v: 'ALL',     l: 'Todas'    },
+                          { v: 'INCOME',  l: 'Receitas' },
+                          { v: 'EXPENSE', l: 'Despesas' },
+                        ].map(f => (
+                          <button key={f.v}
+                            className={`btn btn-sm ${filterType === f.v ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                            onClick={() => handleTypeFilter(f.v)}>
+                            {f.l}
+                          </button>
+                        ))}
+                      </div>
+                      <select
+                        className="form-select form-select-sm"
+                        style={{ width: 'auto', minWidth: 140 }}
+                        value={filterCat}
+                        onChange={e => setFilterCat(e.target.value)}>
+                        <option value="">Todas categorias</option>
+                        {availableCats.map(c => (
+                          <option key={c.id} value={String(c.id)}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
-                  {transactions.length === 0 ? (
+                  {filtered.length === 0 ? (
                     <div className="text-center py-4 text-muted">
                       <i className="bi bi-inbox fs-2 d-block mb-2"></i>
-                      Nenhuma transação em {utils.MONTHS[month - 1]}
+                      Nenhuma transação encontrada
                     </div>
                   ) : (
                     <div className="table-responsive">
                       <table className="table table-hover align-middle mb-0">
                         <thead className="table-light">
                           <tr>
+                            <th>Tipo</th>
                             <th>Descrição</th>
                             <th>Categoria</th>
                             <th>Data</th>
@@ -124,14 +173,15 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {transactions.map(t => (
+                          {filtered.map(t => (
                             <tr key={t.id}>
-                              <td>{t.description || '—'}</td>
                               <td>
-                                <span className="badge rounded-pill" style={{ background: '#e9ecef', color: '#495057' }}>
-                                  {t.categoryName || 'Sem categoria'}
+                                <span className={`badge rounded-pill ${t.type === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
+                                  {t.type === 'INCOME' ? 'Receita' : 'Despesa'}
                                 </span>
                               </td>
+                              <td>{t.description || '—'}</td>
+                              <td>{t.categoryName || '—'}</td>
                               <td>{new Date(t.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                               <td className={`text-end fw-semibold ${t.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
                                 {t.type === 'INCOME' ? '+' : '-'} {utils.formatBRL(t.amount)}
