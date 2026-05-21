@@ -18,6 +18,12 @@
 
   <div id="root"></div>
 
+  <div class="modal fade" id="txModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" id="txModalContent"></div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -27,8 +33,9 @@
   <script src="components/sidebar.js"></script>
 
   <script type="text/babel">
-    const { useState, useEffect, useCallback, useMemo } = React;
+    const { useState, useEffect, useCallback, useMemo, useRef } = React;
     const user = storage.getUser();
+    const EMPTY_FORM = (type) => ({ amount: '', description: '', date: new Date().toISOString().slice(0,10), type, categoryId: '' });
 
     function Dashboard() {
       const now   = new Date();
@@ -40,6 +47,10 @@
       const [loading,      setLoading]      = useState(true);
       const [filterType,   setFilterType]   = useState('ALL');
       const [filterCats,   setFilterCats]   = useState([]);
+      const [form,         setForm]         = useState(EMPTY_FORM('EXPENSE'));
+      const [saving,       setSaving]       = useState(false);
+      const [formError,    setFormError]    = useState('');
+      const modalRef = useRef(null);
 
       const load = useCallback(async () => {
         setLoading(true);
@@ -91,6 +102,34 @@
         );
       }
 
+      function openModal(type) {
+        setForm(EMPTY_FORM(type));
+        setFormError('');
+        modalRef.current = new window.bootstrap.Modal(document.getElementById('txModal'));
+        modalRef.current.show();
+      }
+
+      async function handleSave(e) {
+        e.preventDefault();
+        setFormError(''); setSaving(true);
+        try {
+          await api.post('/transactions', {
+            userId: user.id,
+            amount: Number(form.amount),
+            description: form.description,
+            date: form.date,
+            type: form.type,
+            categoryId: form.categoryId || null,
+          });
+          modalRef.current.hide();
+          load();
+        } catch (err) {
+          setFormError(err.message || 'Erro ao salvar');
+        } finally { setSaving(false); }
+      }
+
+      const modalCats = useMemo(() => categories.filter(c => c.type === form.type), [categories, form.type]);
+
       return (
         <div className="app-layout">
           <Sidebar active="dashboard.html" />
@@ -116,17 +155,24 @@
               <>
                 <div className="row g-3 mb-4">
                   {[
-                    { cls: 'income',  label: 'Receitas',  value: summary?.totalIncome,  icon: 'bi-arrow-up-circle-fill' },
-                    { cls: 'expense', label: 'Despesas',  value: summary?.totalExpense, icon: 'bi-arrow-down-circle-fill' },
-                    { cls: 'balance', label: 'Saldo',     value: summary?.balance,      icon: 'bi-wallet2' },
+                    { cls: 'income',  label: 'Receitas', value: summary?.totalIncome,  icon: 'bi-arrow-up-circle-fill',   type: 'INCOME'  },
+                    { cls: 'expense', label: 'Despesas', value: summary?.totalExpense, icon: 'bi-arrow-down-circle-fill', type: 'EXPENSE' },
+                    { cls: 'balance', label: 'Saldo',    value: summary?.balance,      icon: 'bi-wallet2',                type: null      },
                   ].map(card => (
                     <div key={card.cls} className="col-md-4">
-                      <div className={`summary-card ${card.cls} d-flex justify-content-between align-items-center`}>
+                      <div
+                        className={`summary-card ${card.cls} d-flex justify-content-between align-items-center${card.type ? ' summary-card-clickable' : ''}`}
+                        onClick={card.type ? () => openModal(card.type) : undefined}
+                        title={card.type ? `Adicionar ${card.label.slice(0,-1).toLowerCase()}` : undefined}
+                      >
                         <div>
                           <div className="label">{card.label}</div>
                           <div className="amount">{utils.formatBRL(card.value)}</div>
                         </div>
-                        <i className={`bi ${card.icon}`}></i>
+                        <div className="d-flex flex-column align-items-center gap-1">
+                          <i className={`bi ${card.icon}`}></i>
+                          {card.type && <span style={{ fontSize: '0.65rem', opacity: 0.75, letterSpacing: '0.04em' }}>+ ADICIONAR</span>}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -221,6 +267,56 @@
                   )}
                 </div>
               </>
+            )}
+
+            {ReactDOM.createPortal(
+              <div>
+                <div className="modal-header modal-header-custom">
+                  <h5 className="modal-title">
+                    {form.type === 'INCOME' ? 'Nova receita' : 'Nova despesa'}
+                  </h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form onSubmit={handleSave}>
+                  <div className="modal-body">
+                    {formError && <div className="alert alert-danger py-2">{formError}</div>}
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Valor (R$)</label>
+                      <input className="form-control" type="number" step="0.01" min="0.01" required
+                        value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Descrição</label>
+                      <input className="form-control" type="text" maxLength={255}
+                        value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Data</label>
+                      <input className="form-control" type="date" required
+                        value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Categoria</label>
+                      <select className="form-select"
+                        value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}>
+                        <option value="">Sem categoria</option>
+                        {modalCats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" className="btn btn-primary-custom" disabled={saving}>
+                      {saving ? <span className="spinner-border spinner-border-sm"></span> : 'Salvar'}
+                    </button>
+                  </div>
+                </form>
+              </div>,
+              document.getElementById('txModalContent')
             )}
           </main>
         </div>
