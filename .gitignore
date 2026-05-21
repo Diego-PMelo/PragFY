@@ -1,0 +1,19 @@
+# Credenciais e configurações sensíveis
+backend/src/main/resources/application.properties
+
+# Build
+backend/target/
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
