@@ -801,6 +801,101 @@ html.light-mode .quiz-option.selected { background: rgba(4,38,176,0.07); }
 
 .quiz-option-check { color: var(--color-accent); font-size: 1.1rem; flex-shrink: 0; line-height: 1; }
 
+/* ── Detail modal (perfil investidor) ───────────────────────────────────── */
+.detail-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(3px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.18s ease;
+}
+.detail-modal-box {
+  background: var(--bg-card);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.detail-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1.4rem 1.5rem;
+  color: #fff;
+  position: relative;
+  flex-shrink: 0;
+}
+.detail-modal-hicon {
+  font-size: 1.5rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.detail-modal-title { font-size: 1.05rem; font-weight: 700; line-height: 1.2; }
+.detail-modal-sub   { font-size: 0.78rem; opacity: 0.82; margin-top: 3px; }
+.detail-modal-close {
+  background: rgba(255,255,255,0.18);
+  border: none;
+  color: #fff;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.detail-modal-close:hover { background: rgba(255,255,255,0.3); }
+.detail-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+.detail-modal-body p { margin-bottom: 1rem; }
+.detail-modal-body p:last-child { margin-bottom: 0; }
+
+/* ── Clickable product / step rows ──────────────────────────────────────── */
+.product-row--clickable {
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 0.4rem 0.5rem;
+  margin: 0 -0.5rem;
+  transition: background 0.15s, transform 0.1s;
+}
+.product-row--clickable:hover { background: rgba(128,128,160,0.08); transform: translateX(3px); }
+.product-row--clickable:active { transform: scale(0.99); }
+
+.step-row--clickable {
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+  margin: 0 -0.6rem;
+  transition: background 0.15s, transform 0.1s;
+  align-items: center;
+}
+.step-row--clickable:hover { background: rgba(128,128,160,0.08); transform: translateX(3px); }
+.step-row--clickable:active { transform: scale(0.99); }
+
+.product-chevron {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.product-row--clickable:hover .product-chevron,
+.step-row--clickable:hover .product-chevron { transform: translateX(3px); color: var(--text-secondary); }
+
 /* ── Legacy risk-badge (mantido para compatibilidade) ────────────────────── */
 .risk-badge {
   display: inline-flex; align-items: center; gap: 0.6rem;

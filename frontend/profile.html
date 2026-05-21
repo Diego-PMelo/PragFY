@@ -59,80 +59,122 @@
 
     const PROFILE_DATA = {
       CONSERVADOR: {
-        cls: 'conservador',
-        icon: 'bi-shield-check',
-        color: '#1d9e63',
+        cls: 'conservador', icon: 'bi-shield-check', color: '#1d9e63',
         tagline: 'Segurança em primeiro lugar',
         desc: 'Você valoriza a preservação do patrimônio e prefere rendimentos previsíveis a grandes oscilações. Seu foco é proteger o que conquistou.',
         allocation: [
-          { label: 'Renda Fixa',       pct: 70, color: '#1d9e63' },
-          { label: 'Fundos Mistos',    pct: 20, color: '#0891b2' },
-          { label: 'Renda Variável',   pct: 10, color: '#f59e0b' },
+          { label: 'Renda Fixa',     pct: 70, color: '#1d9e63' },
+          { label: 'Fundos Mistos',  pct: 20, color: '#0891b2' },
+          { label: 'Renda Variável', pct: 10, color: '#f59e0b' },
         ],
         products: [
-          { icon: 'bi-bank',          name: 'Tesouro Selic',      desc: 'Liquidez diária, segurança máxima',          tag: 'Essencial' },
-          { icon: 'bi-building',      name: 'CDB / LCI / LCA',   desc: 'Proteção FGC, rendimento acima da poupança', tag: 'Recomendado' },
-          { icon: 'bi-shield',        name: 'Tesouro IPCA+',      desc: 'Proteção contra inflação no longo prazo',    tag: 'Complementar' },
-          { icon: 'bi-layers',        name: 'Fundos DI',          desc: 'Gestão profissional de renda fixa',          tag: 'Complementar' },
+          { icon: 'bi-bank', name: 'Tesouro Selic', desc: 'Liquidez diária, segurança máxima', tag: 'Essencial',
+            detail: 'O Tesouro Selic é um título público federal emitido pelo governo brasileiro, considerado o investimento mais seguro do país. Sua rentabilidade acompanha a taxa Selic — a taxa básica de juros da economia — o que garante rendimento positivo mesmo em cenários de oscilação do mercado.\n\nPor ter liquidez diária, você pode resgatar o valor investido a qualquer momento sem perda de rentabilidade, o que o torna ideal para a reserva de emergência. Para o perfil Conservador, ele representa a base da carteira: previsível, seguro e acessível.' },
+          { icon: 'bi-building', name: 'CDB / LCI / LCA', desc: 'Proteção FGC, rendimento acima da poupança', tag: 'Recomendado',
+            detail: 'CDB (Certificado de Depósito Bancário), LCI (Letra de Crédito Imobiliário) e LCA (Letra de Crédito do Agronegócio) são títulos emitidos por bancos privados. O grande diferencial é a cobertura do FGC (Fundo Garantidor de Créditos), que protege até R$ 250 mil por CPF por instituição em caso de falência do banco.\n\nLCI e LCA têm a vantagem adicional de serem isentas de Imposto de Renda para pessoa física. Em bancos digitais é possível encontrar CDBs que pagam 110% a 130% do CDI, rendimento muito superior à poupança. São ideais para quem quer segurança com retorno ligeiramente maior.' },
+          { icon: 'bi-shield', name: 'Tesouro IPCA+', desc: 'Proteção contra inflação no longo prazo', tag: 'Complementar',
+            detail: 'O Tesouro IPCA+ paga uma taxa de juros prefixada mais a variação do IPCA (índice oficial de inflação do Brasil). Isso garante que o seu dinheiro sempre renderá acima da inflação, preservando o poder de compra ao longo do tempo.\n\nÉ indicado para objetivos de médio e longo prazo, como aposentadoria ou compra de imóvel. O único cuidado é que, se resgatado antes do vencimento, o valor pode oscilar. Para o perfil Conservador, ele entra como complemento da renda fixa para proteger o patrimônio da inflação no horizonte de longo prazo.' },
+          { icon: 'bi-layers', name: 'Fundos DI', desc: 'Gestão profissional de renda fixa', tag: 'Complementar',
+            detail: 'Os Fundos DI são fundos de investimento que aplicam a maior parte do patrimônio em títulos pós-fixados atrelados ao CDI ou à Selic. São geridos por profissionais e oferecem diversificação automática dentro da renda fixa.\n\nSão uma boa opção para quem quer delegar a gestão da carteira sem abrir mão da segurança. O ponto de atenção é a taxa de administração — prefira fundos com taxa abaixo de 0,5% ao ano. Para o perfil Conservador, complementam a carteira com praticidade e gestão ativa.' },
         ],
         steps: [
-          'Monte uma reserva de emergência de 6 meses de gastos em Tesouro Selic ou CDB com liquidez diária',
-          'Pesquise CDBs com rentabilidade acima de 100% do CDI em bancos digitais',
-          'Abra conta em uma corretora com acesso ao Tesouro Direto (isenção de taxa na maioria)',
-          'Evite investimentos sem proteção do FGC acima de R$ 250 mil por instituição',
+          { label: 'Monte sua reserva de emergência', desc: 'Monte uma reserva de emergência de 6 meses de gastos em Tesouro Selic ou CDB com liquidez diária',
+            detail: 'A reserva de emergência é o alicerce de qualquer planejamento financeiro. Ela deve cobrir entre 3 e 6 meses dos seus gastos mensais totais e ficar em um investimento com liquidez diária — ou seja, você consegue resgatar no mesmo dia ou no dia seguinte sem perda.\n\nSem ela, qualquer imprevisto (perda de emprego, emergência médica, conserto urgente) pode te forçar a sacar investimentos de longo prazo antes da hora, muitas vezes com prejuízo. O Tesouro Selic e CDBs com liquidez diária de grandes bancos são as melhores opções. Só avance para outros investimentos após essa reserva estar completa.' },
+          { label: 'Busque CDBs com maior rentabilidade', desc: 'Pesquise CDBs com rentabilidade acima de 100% do CDI em bancos digitais',
+            detail: 'A poupança rende cerca de 70% da Selic — um dos piores investimentos disponíveis. Bancos digitais como Nubank, Inter, C6 e outros frequentemente oferecem CDBs que pagam entre 100% e 130% do CDI com proteção do FGC.\n\nA diferença parece pequena, mas em 5 anos ela representa milhares de reais a mais no seu bolso. Use comparadores como o Renda Fixa ou o site do Banco Central para encontrar as melhores taxas. Distribua entre diferentes instituições para maximizar a proteção do FGC (R$ 250 mil por banco).' },
+          { label: 'Abra conta em uma corretora', desc: 'Abra conta em uma corretora com acesso ao Tesouro Direto (isenção de taxa na maioria)',
+            detail: 'Para acessar o Tesouro Direto sem pagar taxa de custódia, você precisa de conta em uma corretora habilitada. As principais corretoras do Brasil — XP, Rico, Clear, NuInvest — oferecem isenção de taxa e abertura de conta gratuita e 100% digital.\n\nAlém do Tesouro Direto, a corretora dá acesso a CDBs, LCIs, LCAs, fundos e outros produtos. É um passo simples que abre as portas para uma carteira muito mais eficiente. O processo de abertura leva cerca de 10 minutos e só exige RG, CPF e uma selfie.' },
+          { label: 'Respeite o limite do FGC', desc: 'Evite investimentos sem proteção do FGC acima de R$ 250 mil por instituição',
+            detail: 'O FGC (Fundo Garantidor de Créditos) é uma proteção que garante o reembolso de até R$ 250 mil por CPF por instituição financeira em caso de falência do banco. O limite global é de R$ 1 milhão por CPF a cada 4 anos.\n\nPara o perfil Conservador, nunca deixe mais do que esse valor em uma única instituição em produtos de renda fixa privada (CDB, LCI, LCA). Acima disso, migre para o Tesouro Direto — que não tem limite, pois é garantido pelo governo federal — ou distribua entre outros bancos.' },
         ],
       },
       MODERADO: {
-        cls: 'moderado',
-        icon: 'bi-graph-up',
-        color: '#d97706',
+        cls: 'moderado', icon: 'bi-graph-up', color: '#d97706',
         tagline: 'Equilíbrio entre crescimento e segurança',
         desc: 'Você aceita uma dose de risco em troca de retornos superiores, mas sem abrir mão de uma base sólida de renda fixa.',
         allocation: [
-          { label: 'Renda Fixa',       pct: 50, color: '#1d9e63' },
-          { label: 'FIIs',             pct: 20, color: '#d97706' },
-          { label: 'Renda Variável',   pct: 20, color: '#e05252' },
-          { label: 'Internacional',    pct: 10, color: '#8b5cf6' },
+          { label: 'Renda Fixa',     pct: 50, color: '#1d9e63' },
+          { label: 'FIIs',           pct: 20, color: '#d97706' },
+          { label: 'Renda Variável', pct: 20, color: '#e05252' },
+          { label: 'Internacional',  pct: 10, color: '#8b5cf6' },
         ],
         products: [
-          { icon: 'bi-shield',        name: 'Tesouro IPCA+',      desc: 'Base de proteção contra inflação',           tag: 'Essencial' },
-          { icon: 'bi-buildings',     name: 'FIIs (Fundos Imob.)',desc: 'Renda mensal e exposição ao imobiliário',    tag: 'Recomendado' },
-          { icon: 'bi-pie-chart',     name: 'ETFs (BOVA11)',      desc: 'Diversificação na bolsa com baixo custo',    tag: 'Recomendado' },
-          { icon: 'bi-globe',         name: 'ETFs Internacionais',desc: 'Proteção cambial e exposição global',        tag: 'Complementar' },
+          { icon: 'bi-shield', name: 'Tesouro IPCA+', desc: 'Base de proteção contra inflação', tag: 'Essencial',
+            detail: 'O Tesouro IPCA+ é o produto mais indicado como base de uma carteira moderada. Ele garante rentabilidade real — ou seja, sempre acima da inflação — combinando um percentual fixo com a variação do IPCA.\n\nPara o perfil Moderado, ele ocupa 50% da carteira e funciona como âncora de segurança enquanto os outros 50% buscam retornos maiores em renda variável. Prefira títulos com vencimento alinhado ao seu objetivo financeiro para evitar oscilações no caso de resgate antecipado.' },
+          { icon: 'bi-buildings', name: 'FIIs (Fundos Imobiliários)', desc: 'Renda mensal e exposição ao imobiliário', tag: 'Recomendado',
+            detail: 'Os Fundos de Investimento Imobiliário (FIIs) são fundos que investem em imóveis ou em títulos do mercado imobiliário. Eles são negociados na bolsa como ações e distribuem pelo menos 95% dos lucros mensalmente — o que gera uma renda passiva regular na sua conta.\n\nPara pessoa física, os rendimentos dos FIIs são isentos de Imposto de Renda. Para o perfil Moderado, eles oferecem um meio-termo perfeito: exposição ao mercado real com renda previsível. Os principais tipos são FIIs de tijolo (imóveis físicos) e FIIs de papel (CRIs e CRAs).' },
+          { icon: 'bi-pie-chart', name: 'ETFs (BOVA11)', desc: 'Diversificação na bolsa com baixo custo', tag: 'Recomendado',
+            detail: 'ETFs (Exchange Traded Funds) são fundos negociados em bolsa que replicam um índice de mercado. O BOVA11, por exemplo, replica o Ibovespa — o principal índice da bolsa brasileira — e investe automaticamente nas maiores empresas do país.\n\nA grande vantagem é a diversificação instantânea com taxa de administração muito baixa (geralmente abaixo de 0,5% ao ano). Em vez de tentar escolher as melhores ações individualmente, você compra um pedaço de todas as maiores empresas ao mesmo tempo. Ideal para quem quer exposição à bolsa sem dedicar tempo à análise de empresas.' },
+          { icon: 'bi-globe', name: 'ETFs Internacionais', desc: 'Proteção cambial e exposição global', tag: 'Complementar',
+            detail: 'ETFs internacionais como o IVVB11 (que replica o S&P 500 americano) permitem investir nos maiores mercados do mundo diretamente pela bolsa brasileira, sem precisar abrir conta no exterior.\n\nAlém de acessar empresas como Apple, Microsoft e Amazon, você ganha proteção cambial — quando o dólar sobe, o valor do seu investimento em reais também sobe. Para o perfil Moderado, eles entram com 10% da carteira como diversificação geográfica e proteção contra crises locais.' },
         ],
         steps: [
-          'Garanta primeiro a reserva de emergência (3 a 6 meses de gastos) em renda fixa líquida',
-          'Comece com ETFs como BOVA11 para exposição à bolsa com diversificação automática',
-          'Pesquise FIIs de tijolo ou papel com histórico de distribuição consistente',
-          'Defina uma alocação mensal fixa e aporte regularmente, independente do mercado',
+          { label: 'Garanta a reserva de emergência primeiro', desc: 'Garanta primeiro a reserva de emergência (3 a 6 meses de gastos) em renda fixa líquida',
+            detail: 'Antes de qualquer investimento em renda variável, você precisa ter uma reserva de emergência sólida. Sem ela, o primeiro imprevisto pode te forçar a vender ações ou FIIs em um momento ruim do mercado, realizando prejuízo.\n\nPara o perfil Moderado, a reserva deve equivaler a 3 meses de gastos (já que você tem maior capacidade de geração de renda e controle financeiro). Mantenha-a em Tesouro Selic ou CDB com liquidez diária, separada mentalmente da sua carteira de investimentos.' },
+          { label: 'Comece com ETFs para exposição à bolsa', desc: 'Comece com ETFs como BOVA11 para exposição à bolsa com diversificação automática',
+            detail: 'O erro mais comum de quem começa a investir em renda variável é escolher ações individuais sem experiência suficiente. ETFs eliminam esse risco ao diversificar automaticamente entre dezenas ou centenas de empresas.\n\nO BOVA11 pode ser comprado por qualquer valor (uma cota custa em torno de R$ 100) e já te expõe às maiores empresas do Brasil. Com isso, você aprende como o mercado funciona, acompanha os movimentos e ganha confiança antes de eventualmente selecionar ações por conta própria.' },
+          { label: 'Pesquise FIIs com histórico consistente', desc: 'Pesquise FIIs de tijolo ou papel com histórico de distribuição consistente',
+            detail: 'Nem todo FII é igual. Antes de comprar, analise o histórico de distribuição de rendimentos (dividend yield), a qualidade dos ativos na carteira e a taxa de vacância (para FIIs de imóveis físicos).\n\nFIIs de tijolo com imóveis em localizações premium e contratos de locação longos tendem a ser mais estáveis. FIIs de papel, que investem em CRIs e CRAs, costumam ter rendimento atrelado ao IPCA ou CDI. Use plataformas como o FundsExplorer ou o site de cada fundo para analisar os relatórios mensais antes de investir.' },
+          { label: 'Aporte mensalmente com valor fixo', desc: 'Defina uma alocação mensal fixa e aporte regularmente, independente do mercado',
+            detail: 'A estratégia de aportes regulares — conhecida como dollar-cost averaging — é uma das mais eficazes para investidores de longo prazo. Ao aportar todo mês independentemente do preço, você compra mais cotas quando o mercado cai e menos quando sobe, reduzindo o custo médio ao longo do tempo.\n\nNão tente "adivinhar" o melhor momento para comprar — estudos mostram que mesmo especialistas raramente conseguem fazer isso de forma consistente. Automatize seus aportes e mantenha a disciplina, especialmente nos momentos de queda do mercado.' },
         ],
       },
       ARROJADO: {
-        cls: 'arrojado',
-        icon: 'bi-graph-up-arrow',
-        color: '#e05252',
+        cls: 'arrojado', icon: 'bi-graph-up-arrow', color: '#e05252',
         tagline: 'Alto potencial de retorno',
         desc: 'Você tem tolerância alta ao risco e busca maximizar retornos no longo prazo. Oscilações do mercado fazem parte da estratégia.',
         allocation: [
-          { label: 'Renda Variável',   pct: 50, color: '#e05252' },
-          { label: 'Internacional',    pct: 20, color: '#8b5cf6' },
-          { label: 'FIIs',             pct: 15, color: '#d97706' },
-          { label: 'Renda Fixa',       pct: 15, color: '#1d9e63' },
+          { label: 'Renda Variável', pct: 50, color: '#e05252' },
+          { label: 'Internacional',  pct: 20, color: '#8b5cf6' },
+          { label: 'FIIs',           pct: 15, color: '#d97706' },
+          { label: 'Renda Fixa',     pct: 15, color: '#1d9e63' },
         ],
         products: [
-          { icon: 'bi-graph-up-arrow', name: 'Ações (B3)',        desc: 'Maior potencial de retorno no longo prazo',  tag: 'Essencial' },
-          { icon: 'bi-globe2',        name: 'ETFs Globais',       desc: 'IVVB11, BDRs — diversificação internacional',tag: 'Recomendado' },
-          { icon: 'bi-buildings',     name: 'FIIs',               desc: 'Renda passiva com exposição ao mercado real', tag: 'Recomendado' },
-          { icon: 'bi-currency-bitcoin', name: 'Criptoativos',    desc: 'Alta volatilidade — mantenha abaixo de 5%',  tag: 'Opcional' },
+          { icon: 'bi-graph-up-arrow', name: 'Ações (B3)', desc: 'Maior potencial de retorno no longo prazo', tag: 'Essencial',
+            detail: 'Ações são frações do capital de uma empresa. Ao comprar ações, você se torna sócio do negócio e passa a ter direito a uma parte dos lucros (dividendos) e à valorização da empresa ao longo do tempo.\n\nO mercado de ações é volátil no curto prazo, mas historicamente é o ativo com maior retorno real no longo prazo. Para o perfil Arrojado, as ações representam 50% da carteira. A chave é selecionar empresas com fundamentos sólidos e manter o investimento por anos — não tentar lucrar com oscilações diárias.' },
+          { icon: 'bi-globe2', name: 'ETFs Globais', desc: 'IVVB11, BDRs — diversificação internacional', tag: 'Recomendado',
+            detail: 'Concentrar todos os investimentos no Brasil expõe sua carteira a riscos políticos e econômicos locais. ETFs globais como o IVVB11 (S&P 500) e BDRs de grandes empresas americanas permitem diversificar geograficamente sem sair da bolsa brasileira.\n\nHistoricamente, o S&P 500 rendeu em torno de 10% ao ano em dólares. Para o perfil Arrojado, 20% em ETFs internacionais oferece proteção cambial e acesso às maiores empresas de tecnologia, saúde e consumo do mundo, setores pouco representados na bolsa brasileira.' },
+          { icon: 'bi-buildings', name: 'FIIs', desc: 'Renda passiva com exposição ao mercado real', tag: 'Recomendado',
+            detail: 'Mesmo para o perfil Arrojado, uma parcela em FIIs é recomendada para gerar renda passiva mensal e reduzir a volatilidade geral da carteira. FIIs tendem a oscilar menos do que ações individuais e pagam rendimentos mensais isentos de IR.\n\nCom 15% da carteira, os FIIs entram como elemento de equilíbrio: enquanto as ações buscam valorização de capital, os FIIs entregam renda constante que pode ser reinvestida ou usada para o custo de vida.' },
+          { icon: 'bi-currency-bitcoin', name: 'Criptoativos', desc: 'Alta volatilidade — mantenha abaixo de 5%', tag: 'Opcional',
+            detail: 'Criptoativos como Bitcoin e Ethereum são ativos digitais descentralizados com altíssima volatilidade — podem subir ou cair 50% em poucos meses. Por isso, mesmo para perfis arrojados, a recomendação é limitar a exposição a no máximo 5% do patrimônio total.\n\nEssa parcela funciona como um "bônus" de risco: se valorizar muito, impacta positivamente o portfólio; se desvalorizar, o impacto é controlado. Prefira exchanges regulamentadas no Brasil ou ETFs de cripto disponíveis na B3. Nunca invista em cripto valores que comprometam seus objetivos principais.' },
         ],
         steps: [
-          'Mantenha uma reserva de emergência separada da carteira de investimentos (mínimo 3 meses)',
-          'Estude análise fundamentalista antes de selecionar ações individuais',
-          'Use dollar-cost averaging — aporte mensalmente independente do preço',
-          'Diversifique entre setores e geografias para reduzir risco não-sistêmico',
+          { label: 'Mantenha a reserva de emergência separada', desc: 'Mantenha uma reserva de emergência separada da carteira de investimentos (mínimo 3 meses)',
+            detail: 'Mesmo sendo arrojado, você não deve misturar sua reserva de emergência com a carteira de investimentos. Se precisar de dinheiro urgente e seu portfólio estiver em queda, você seria obrigado a vender ativos no pior momento.\n\nMínimo de 3 meses de gastos em Tesouro Selic ou CDB com liquidez diária é suficiente para o perfil Arrojado. Considere essa reserva como intocável e invisível — ela não faz parte da carteira, é apenas uma proteção para que você nunca precise tomar decisões financeiras por desespero.' },
+          { label: 'Estude análise fundamentalista', desc: 'Estude análise fundamentalista antes de selecionar ações individuais',
+            detail: 'Análise fundamentalista é o método de avaliar uma empresa através de seus dados financeiros: receita, lucro, dívida, margens, crescimento e múltiplos de valuation como P/L (Preço/Lucro) e P/VP (Preço/Valor Patrimonial).\n\nAntes de comprar ações de uma empresa, leia os relatórios trimestrais, entenda o modelo de negócio e compare com concorrentes. Plataformas como o Status Invest, Fundamentus e os próprios Relatórios de Administração das empresas na B3 são pontos de partida excelentes. Sem esse estudo, você não investe — especula.' },
+          { label: 'Use aportes mensais regulares', desc: 'Use dollar-cost averaging — aporte mensalmente independente do preço',
+            detail: 'Dollar-cost averaging (DCA) é a estratégia de aportar um valor fixo todo mês, independentemente se o mercado está em alta ou em baixa. Quando os preços caem, você compra mais cotas pelo mesmo dinheiro; quando sobem, compra menos — resultando em um custo médio reduzido ao longo do tempo.\n\nPara o perfil Arrojado, essa disciplina é ainda mais importante, pois a tentação de "esperar o momento certo" para comprar ou vender é enorme. Estudos mostram que investidores que tentam fazer market timing consistentemente têm desempenho inferior a quem simplesmente aporta todo mês.' },
+          { label: 'Diversifique setores e geografias', desc: 'Diversifique entre setores e geografias para reduzir risco não-sistêmico',
+            detail: 'Concentrar a carteira em um único setor ou país é o erro mais comum de investidores arrojados. Se você tiver 80% em ações de bancos e o setor bancário passar por uma crise, seu portfólio sofre de forma desproporcional.\n\nA diversificação não elimina o risco de mercado (nenhum investimento é imune a crises globais), mas reduz o risco não-sistêmico — o risco específico de um setor ou empresa. Distribua entre setores como tecnologia, energia, saúde, consumo e financeiro, e entre diferentes países para proteger a carteira de eventos locais.' },
         ],
       },
     };
+
+    function DetailModal({ item, color, onClose }) {
+      if (!item) return null;
+      const paragraphs = item.detail.split('\n\n');
+      return (
+        <div className="detail-modal-backdrop" onClick={onClose}>
+          <div className="detail-modal-box fade-in" onClick={e => e.stopPropagation()}>
+            <div className="detail-modal-header" style={{ background: color }}>
+              {item.icon && <i className={`bi ${item.icon} detail-modal-hicon`}></i>}
+              <div className="flex-grow-1">
+                <div className="detail-modal-title">{item.name || item.label}</div>
+                {item.desc && <div className="detail-modal-sub">{item.desc}</div>}
+              </div>
+              <button className="detail-modal-close" onClick={onClose}>
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div className="detail-modal-body">
+              {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     function AllocationBar({ allocation }) {
       return (
@@ -157,6 +199,7 @@
     }
 
     function ProfileResult({ saved, onRedo }) {
+      const [selected, setSelected] = useState(null);
       const data = PROFILE_DATA[saved.riskProfile];
       if (!data) return null;
 
@@ -164,6 +207,10 @@
 
       return (
         <div className="fade-in">
+          {selected && (
+            <DetailModal item={selected} color={data.color} onClose={() => setSelected(null)} />
+          )}
+
           {/* Hero card */}
           <div className={`profile-hero profile-hero--${data.cls} mb-4`}>
             <div className="d-flex align-items-center gap-3 mb-3">
@@ -200,10 +247,13 @@
                 <h2 className="section-title">
                   <i className="bi bi-star me-2" style={{ color: data.color }}></i>
                   Produtos recomendados
+                  <span className="ms-2" style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--text-muted)' }}>
+                    clique para saber mais
+                  </span>
                 </h2>
                 <div className="d-flex flex-column gap-2">
                   {data.products.map(p => (
-                    <div key={p.name} className="product-row">
+                    <div key={p.name} className="product-row product-row--clickable" onClick={() => setSelected(p)}>
                       <div className="product-icon" style={{ background: data.color + '22', color: data.color }}>
                         <i className={`bi ${p.icon}`}></i>
                       </div>
@@ -216,6 +266,7 @@
                         </div>
                         <div className="product-desc">{p.desc}</div>
                       </div>
+                      <i className="bi bi-chevron-right product-chevron"></i>
                     </div>
                   ))}
                 </div>
@@ -228,12 +279,16 @@
                 <h2 className="section-title">
                   <i className="bi bi-list-check me-2" style={{ color: data.color }}></i>
                   Primeiros passos
+                  <span className="ms-2" style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--text-muted)' }}>
+                    clique para saber mais
+                  </span>
                 </h2>
-                <div className="d-flex flex-column gap-3">
+                <div className="d-flex flex-column gap-2">
                   {data.steps.map((step, i) => (
-                    <div key={i} className="step-row">
+                    <div key={i} className="step-row step-row--clickable" onClick={() => setSelected(step)}>
                       <div className="step-num" style={{ background: data.color }}>{i + 1}</div>
-                      <p className="step-text">{step}</p>
+                      <p className="step-text">{step.desc}</p>
+                      <i className="bi bi-chevron-right product-chevron ms-2"></i>
                     </div>
                   ))}
                 </div>
