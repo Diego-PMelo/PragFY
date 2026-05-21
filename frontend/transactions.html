@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PragFY - Transações</title>
+  <link rel="icon" href="assets/PragFY_Logo.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <script src="services/storage.js"></script>
+  <script>if (!storage.getUser()) window.location.replace('index.html');</script>
+
+  <div id="root"></div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="txModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" id="txModalContent"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="services/api.js"></script>
+  <script src="services/utils.js"></script>
+  <script src="components/sidebar.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useRef } = React;
+    const user = storage.getUser();
+    const EMPTY = { amount: '', description: '', date: new Date().toISOString().slice(0,10), type: 'EXPENSE', categoryId: '' };
+
+    function Transactions() {
+      const now = new Date();
+      const [month,        setMonth]        = useState(now.getMonth() + 1);
+      const [year,         setYear]         = useState(now.getFullYear());
+      const [transactions, setTransactions] = useState([]);
+      const [categories,   setCategories]   = useState([]);
+      const [loading,      setLoading]      = useState(true);
+      const [form,         setForm]         = useState(EMPTY);
+      const [editId,       setEditId]       = useState(null);
+      const [saving,       setSaving]       = useState(false);
+      const [error,        setError]        = useState('');
+      const modalRef = useRef(null);
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        try {
+          const [t, c] = await Promise.all([
+            api.get(`/transactions?userId=${user.id}&month=${month}&year=${year}`),
+            api.get(`/categories?userId=${user.id}`)
+          ]);
+          setTransactions(t);
+          setCategories(c);
+        } finally { setLoading(false); }
+      }, [month, year]);
+
+      useEffect(() => { load(); }, [load]);
+
+      function prevMonth() { if (month === 1) { setMonth(12); setYear(y => y-1); } else setMonth(m => m-1); }
+      function nextMonth() { if (month === 12) { setMonth(1); setYear(y => y+1); } else setMonth(m => m+1); }
+
+      function openModal(t = null) {
+        setError('');
+        if (t) {
+          setEditId(t.id);
+          setForm({ amount: t.amount, description: t.description || '', date: t.date, type: t.type, categoryId: t.categoryId || '' });
+        } else {
+          setEditId(null);
+          setForm(EMPTY);
+        }
+        modalRef.current = new window.bootstrap.Modal(document.getElementById('txModal'));
+        modalRef.current.show();
+      }
+
+      async function handleSave(e) {
+        e.preventDefault();
+        setError(''); setSaving(true);
+        const payload = { userId: user.id, amount: Number(form.amount), description: form.description,
+                          date: form.date, type: form.type, categoryId: form.categoryId || null };
+        try {
+          if (editId) await api.put(`/transactions/${editId}`, payload);
+          else        await api.post('/transactions', payload);
+          modalRef.current.hide();
+          load();
+        } catch (err) {
+          setError(err.message || 'Erro ao salvar');
+        } finally { setSaving(false); }
+      }
+
+      async function handleDelete(id) {
+        if (!confirm('Excluir esta transação?')) return;
+        await api.del(`/transactions/${id}`);
+        load();
+      }
+
+      const filteredCats = categories.filter(c => c.type === form.type);
+
+      return (
+        <div className="app-layout">
+          <Sidebar active="transactions.html" />
+
+          <main className="main-content fade-in">
+            <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h1 className="page-title">Transações</h1>
+                <p className="page-subtitle">Gerencie suas receitas e despesas</p>
+              </div>
+              <div className="d-flex align-items-center gap-3 flex-wrap">
+                <div className="month-picker">
+                  <button onClick={prevMonth}><i className="bi bi-chevron-left"></i></button>
+                  <span>{utils.MONTHS[month-1]} {year}</span>
+                  <button onClick={nextMonth}><i className="bi bi-chevron-right"></i></button>
+                </div>
+                <button className="btn btn-primary-custom" onClick={() => openModal()}>
+                  <i className="bi bi-plus-lg me-1"></i>Nova transação
+                </button>
+              </div>
+            </div>
+
+            <div className="card-section">
+              {loading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border" style={{ color: 'var(--color-accent)' }}></div>
+                </div>
+              ) : transactions.length === 0 ? (
+                <div className="text-center py-5 text-muted">
+                  <i className="bi bi-inbox fs-1 d-block mb-2"></i>
+                  <p>Nenhuma transação em {utils.MONTHS[month-1]} {year}</p>
+                  <button className="btn btn-primary-custom mt-2" onClick={() => openModal()}>
+                    Adicionar transação
+                  </button>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Data</th>
+                        <th className="text-end">Valor</th><th className="text-end">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map(t => (
+                        <tr key={t.id}>
+                          <td>
+                            <span className={`badge rounded-pill ${t.type === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
+                              {t.type === 'INCOME' ? 'Receita' : 'Despesa'}
+                            </span>
+                          </td>
+                          <td>{t.description || '—'}</td>
+                          <td>{t.categoryName || '—'}</td>
+                          <td>{new Date(t.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                          <td className={`text-end fw-semibold ${t.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
+                            {t.type === 'INCOME' ? '+' : '-'} {utils.formatBRL(t.amount)}
+                          </td>
+                          <td className="text-end">
+                            <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => openModal(t)}>
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(t.id)}>
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Conteúdo do modal renderizado via portal */}
+            {ReactDOM.createPortal(
+              <div>
+                <div className="modal-header modal-header-custom">
+                  <h5 className="modal-title">{editId ? 'Editar transação' : 'Nova transação'}</h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" style={{ filter: 'invert(1)' }}></button>
+                </div>
+                <form onSubmit={handleSave}>
+                  <div className="modal-body">
+                    {error && <div className="alert alert-danger py-2">{error}</div>}
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Tipo</label>
+                      <div className="d-flex gap-3">
+                        {['EXPENSE','INCOME'].map(tp => (
+                          <div key={tp} className="form-check">
+                            <input className="form-check-input" type="radio" name="txType"
+                              id={`txType_${tp}`} value={tp} checked={form.type === tp}
+                              onChange={e => setForm(f => ({ ...f, type: e.target.value, categoryId: '' }))} />
+                            <label className="form-check-label" htmlFor={`txType_${tp}`}>
+                              {tp === 'INCOME' ? 'Receita' : 'Despesa'}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Valor (R$)</label>
+                      <input className="form-control" type="number" step="0.01" min="0.01" required
+                        value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Descrição</label>
+                      <input className="form-control" type="text" maxLength={255}
+                        value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Data</label>
+                      <input className="form-control" type="date" required
+                        value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Categoria</label>
+                      <select className="form-select"
+                        value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}>
+                        <option value="">Sem categoria</option>
+                        {filteredCats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" className="btn btn-primary-custom" disabled={saving}>
+                      {saving ? <span className="spinner-border spinner-border-sm"></span> : 'Salvar'}
+                    </button>
+                  </div>
+                </form>
+              </div>,
+              document.getElementById('txModalContent')
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Transactions />);
+  </script>
+</body>
+</html>

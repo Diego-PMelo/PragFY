@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PragFY - Dashboard</title>
+  <link rel="icon" href="assets/PragFY_Logo.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <script src="services/storage.js"></script>
+  <script>if (!storage.getUser()) window.location.replace('index.html');</script>
+
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="services/api.js"></script>
+  <script src="services/utils.js"></script>
+  <script src="components/sidebar.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+    const user = storage.getUser();
+
+    function Dashboard() {
+      const now   = new Date();
+      const [month,        setMonth]        = useState(now.getMonth() + 1);
+      const [year,         setYear]         = useState(now.getFullYear());
+      const [summary,      setSummary]      = useState(null);
+      const [transactions, setTransactions] = useState([]);
+      const [loading,      setLoading]      = useState(true);
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        try {
+          const [s, t] = await Promise.all([
+            api.get(`/transactions/summary?userId=${user.id}&month=${month}&year=${year}`),
+            api.get(`/transactions?userId=${user.id}&month=${month}&year=${year}`)
+          ]);
+          setSummary(s);
+          setTransactions(t.slice(0, 5));
+        } catch {
+          setSummary(null);
+          setTransactions([]);
+        } finally {
+          setLoading(false);
+        }
+      }, [month, year]);
+
+      useEffect(() => { load(); }, [load]);
+
+      function prevMonth() { if (month === 1) { setMonth(12); setYear(y => y - 1); } else setMonth(m => m - 1); }
+      function nextMonth() { if (month === 12) { setMonth(1); setYear(y => y + 1); } else setMonth(m => m + 1); }
+
+      return (
+        <div className="app-layout">
+          <Sidebar active="dashboard.html" />
+
+          <main className="main-content fade-in">
+            <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h1 className="page-title">Dashboard</h1>
+                <p className="page-subtitle">Visão geral das suas finanças</p>
+              </div>
+              <div className="month-picker">
+                <button onClick={prevMonth}><i className="bi bi-chevron-left"></i></button>
+                <span>{utils.MONTHS[month - 1]} {year}</span>
+                <button onClick={nextMonth}><i className="bi bi-chevron-right"></i></button>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border" style={{ color: 'var(--color-accent)' }}></div>
+              </div>
+            ) : (
+              <>
+                <div className="row g-3 mb-4">
+                  {[
+                    { cls: 'income',  label: 'Receitas',  value: summary?.totalIncome,  icon: 'bi-arrow-up-circle-fill' },
+                    { cls: 'expense', label: 'Despesas',  value: summary?.totalExpense, icon: 'bi-arrow-down-circle-fill' },
+                    { cls: 'balance', label: 'Saldo',     value: summary?.balance,      icon: 'bi-wallet2' },
+                  ].map(card => (
+                    <div key={card.cls} className="col-md-4">
+                      <div className={`summary-card ${card.cls} d-flex justify-content-between align-items-center`}>
+                        <div>
+                          <div className="label">{card.label}</div>
+                          <div className="amount">{utils.formatBRL(card.value)}</div>
+                        </div>
+                        <i className={`bi ${card.icon}`}></i>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="card-section">
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h2 className="section-title mb-0">Últimas transações</h2>
+                    <a href="transactions.html" className="btn btn-sm btn-primary-custom">Ver todas</a>
+                  </div>
+
+                  {transactions.length === 0 ? (
+                    <div className="text-center py-4 text-muted">
+                      <i className="bi bi-inbox fs-2 d-block mb-2"></i>
+                      Nenhuma transação em {utils.MONTHS[month - 1]}
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-hover align-middle mb-0">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Data</th>
+                            <th className="text-end">Valor</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {transactions.map(t => (
+                            <tr key={t.id}>
+                              <td>{t.description || '—'}</td>
+                              <td>
+                                <span className="badge rounded-pill" style={{ background: '#e9ecef', color: '#495057' }}>
+                                  {t.categoryName || 'Sem categoria'}
+                                </span>
+                              </td>
+                              <td>{new Date(t.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                              <td className={`text-end fw-semibold ${t.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
+                                {t.type === 'INCOME' ? '+' : '-'} {utils.formatBRL(t.amount)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Dashboard />);
+  </script>
+</body>
+</html>
