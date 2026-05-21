@@ -30,7 +30,7 @@ public class Transaction {
     @Column(length = 255)
     private String description;
 
-    @Column(nullable = false)
+    @Column(name = "transaction_date", nullable = false)
     private LocalDate date;
 
     @Enumerated(EnumType.STRING)

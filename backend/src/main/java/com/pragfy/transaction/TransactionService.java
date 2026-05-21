@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -23,16 +24,20 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
 
     public List<TransactionResponse> findByUserAndMonth(Long userId, int month, int year) {
-        return transactionRepository.findByUserAndMonth(userId, month, year).stream()
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end   = start.withDayOfMonth(start.lengthOfMonth());
+        return transactionRepository.findByUserAndMonth(userId, start, end).stream()
                 .map(TransactionResponse::from)
                 .toList();
     }
 
     public MonthlySummaryResponse getMonthlySummary(Long userId, int month, int year) {
-        BigDecimal totalIncome = transactionRepository
-                .sumByUserAndTypeAndMonth(userId, TransactionType.INCOME, month, year);
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end   = start.withDayOfMonth(start.lengthOfMonth());
+        BigDecimal totalIncome  = transactionRepository
+                .sumByUserAndTypeAndMonth(userId, TransactionType.INCOME,  start, end);
         BigDecimal totalExpense = transactionRepository
-                .sumByUserAndTypeAndMonth(userId, TransactionType.EXPENSE, month, year);
+                .sumByUserAndTypeAndMonth(userId, TransactionType.EXPENSE, start, end);
         return new MonthlySummaryResponse(month, year, totalIncome, totalExpense,
                 totalIncome.subtract(totalExpense));
     }
