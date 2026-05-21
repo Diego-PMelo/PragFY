@@ -919,6 +919,24 @@ html.light-mode .quiz-option.selected { background: rgba(4,38,176,0.07); }
 .detail-modal-body p { margin-bottom: 1rem; }
 .detail-modal-body p:last-child { margin-bottom: 0; }
 
+.detail-method-section {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  background: rgba(128,128,160,0.07);
+  border-left: 3px solid currentColor;
+}
+.detail-method-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+}
+.detail-method-section p { margin-bottom: 0; font-size: 0.875rem; }
+
 /* ── Clickable product / step rows ──────────────────────────────────────── */
 .product-row--clickable {
   cursor: pointer;
