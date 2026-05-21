@@ -37,6 +37,102 @@
     const user = storage.getUser();
     const EMPTY_FORM = (type) => ({ amount: '', description: '', date: new Date().toISOString().slice(0,10), type, categoryId: '' });
 
+    const PROFILE_META = {
+      CONSERVADOR: {
+        icon: 'bi-shield-check', color: '#1d9e63',
+        tagline: 'Segurança em primeiro lugar',
+        allocation: [
+          { label: 'Renda Fixa',     pct: 70, color: '#1d9e63' },
+          { label: 'Fundos Mistos',  pct: 20, color: '#0891b2' },
+          { label: 'Renda Variável', pct: 10, color: '#f59e0b' },
+        ],
+      },
+      MODERADO: {
+        icon: 'bi-graph-up', color: '#d97706',
+        tagline: 'Crescimento com os pés no chão',
+        allocation: [
+          { label: 'Renda Fixa',     pct: 50, color: '#1d9e63' },
+          { label: 'FIIs',           pct: 20, color: '#d97706' },
+          { label: 'Renda Variável', pct: 20, color: '#e05252' },
+          { label: 'Internacional',  pct: 10, color: '#8b5cf6' },
+        ],
+      },
+      ARROJADO: {
+        icon: 'bi-graph-up-arrow', color: '#e05252',
+        tagline: 'Crescimento máximo no longo prazo',
+        allocation: [
+          { label: 'Renda Variável', pct: 50, color: '#e05252' },
+          { label: 'Internacional',  pct: 20, color: '#8b5cf6' },
+          { label: 'FIIs',           pct: 15, color: '#d97706' },
+          { label: 'Renda Fixa',     pct: 15, color: '#1d9e63' },
+        ],
+      },
+    };
+
+    function InvestorProfileCard({ profile, profileLoading }) {
+      if (profileLoading) return null;
+
+      if (!profile) return (
+        <div className="card-section mb-4 d-flex align-items-center gap-3 flex-wrap">
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-accent)22', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <i className="bi bi-person-badge" style={{ color: 'var(--color-accent)', fontSize: '1.25rem' }}></i>
+          </div>
+          <div className="flex-grow-1">
+            <div className="fw-semibold">Perfil de investidor não definido</div>
+            <div className="text-muted" style={{ fontSize: '0.82rem' }}>
+              Responda o questionário e receba recomendações personalizadas de investimento
+            </div>
+          </div>
+          <a href="profile.html" className="btn btn-sm btn-primary-custom">
+            <i className="bi bi-clipboard-check me-1"></i>Definir perfil
+          </a>
+        </div>
+      );
+
+      const meta = PROFILE_META[profile.riskProfile];
+      if (!meta) return null;
+      const name = profile.riskProfile.charAt(0) + profile.riskProfile.slice(1).toLowerCase();
+
+      return (
+        <div className="card-section mb-4">
+          <div className="d-flex align-items-center gap-3 flex-wrap">
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: meta.color + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <i className={`bi ${meta.icon}`} style={{ color: meta.color, fontSize: '1.25rem' }}></i>
+            </div>
+            <div className="flex-grow-1">
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <span className="fw-semibold" style={{ fontSize: '0.95rem' }}>Perfil de Investidor</span>
+                <span className="badge" style={{ background: meta.color + '22', color: meta.color, fontWeight: 600, fontSize: '0.78rem', padding: '3px 10px', borderRadius: 20 }}>
+                  {name}
+                </span>
+              </div>
+              <div className="text-muted" style={{ fontSize: '0.82rem' }}>{meta.tagline}</div>
+            </div>
+            <a href="profile.html" className="btn btn-sm btn-outline-secondary">
+              Ver perfil completo <i className="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+
+          <div className="mt-3">
+            <div style={{ height: 8, borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
+              {meta.allocation.map(a => (
+                <div key={a.label} style={{ width: `${a.pct}%`, background: a.color, transition: 'width 0.4s' }}
+                  title={`${a.label}: ${a.pct}%`} />
+              ))}
+            </div>
+            <div className="d-flex flex-wrap gap-3 mt-2">
+              {meta.allocation.map(a => (
+                <div key={a.label} className="d-flex align-items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: a.color, display: 'inline-block', flexShrink: 0 }}></span>
+                  {a.label}&nbsp;<span style={{ color: a.color, fontWeight: 600 }}>{a.pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function Dashboard() {
       const now   = new Date();
       const [month,        setMonth]        = useState(now.getMonth() + 1);
@@ -50,8 +146,10 @@
       const [form,         setForm]         = useState(EMPTY_FORM('EXPENSE'));
       const [saving,       setSaving]       = useState(false);
       const [formError,    setFormError]    = useState('');
-      const [newCat,       setNewCat]       = useState(null);
-      const [savingCat,    setSavingCat]    = useState(false);
+      const [newCat,         setNewCat]         = useState(null);
+      const [savingCat,      setSavingCat]      = useState(false);
+      const [profile,        setProfile]        = useState(null);
+      const [profileLoading, setProfileLoading] = useState(true);
       const modalRef = useRef(null);
 
       const CAT_COLORS = ['#0426b0','#1a9e5c','#e55353','#f59e0b','#8b5cf6','#0891b2','#db2777','#65a30d'];
@@ -81,6 +179,14 @@
       }, [month, year]);
 
       useEffect(() => { load(); }, [load]);
+
+      useEffect(() => {
+        setProfileLoading(true);
+        api.get(`/profile?userId=${user.id}`)
+          .then(p => setProfile(p))
+          .catch(() => setProfile(null))
+          .finally(() => setProfileLoading(false));
+      }, []);
 
       function prevMonth() { if (month === 1) { setMonth(12); setYear(y => y - 1); } else setMonth(m => m - 1); }
       function nextMonth() { if (month === 12) { setMonth(1); setYear(y => y + 1); } else setMonth(m => m + 1); }
@@ -208,6 +314,8 @@
                     </div>
                   ))}
                 </div>
+
+                <InvestorProfileCard profile={profile} profileLoading={profileLoading} />
 
                 <div className="card-section">
                   <div className="mb-3">
