@@ -573,6 +573,23 @@ html.light-mode .badge-expense { background: #fee2e2; color: #991b1b; }
 .empty-state i { font-size: 2.5rem; opacity: 0.5; }
 .empty-state p { margin: 0; font-size: 0.9rem; }
 
+/* ── Category chip (filtro multi-select) ────────────────────────────────── */
+.cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  border: 1.5px solid var(--chip-color, var(--color-accent));
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+  font-family: var(--font-main);
+  white-space: nowrap;
+}
+.cat-chip:hover { transform: translateY(-1px); opacity: 0.9; }
+.cat-chip:active { transform: scale(0.97); }
+
 /* ── Category card ───────────────────────────────────────────────────────── */
 .cat-card {
   background: var(--bg-card);

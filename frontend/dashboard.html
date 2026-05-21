@@ -39,7 +39,7 @@
       const [categories,   setCategories]   = useState([]);
       const [loading,      setLoading]      = useState(true);
       const [filterType,   setFilterType]   = useState('ALL');
-      const [filterCat,    setFilterCat]    = useState('');
+      const [filterCats,   setFilterCats]   = useState([]);
 
       const load = useCallback(async () => {
         setLoading(true);
@@ -69,10 +69,10 @@
       const filtered = useMemo(() => {
         return transactions.filter(t => {
           const typeOk = filterType === 'ALL' || t.type === filterType;
-          const catOk  = !filterCat || String(t.categoryId) === filterCat;
+          const catOk  = filterCats.length === 0 || filterCats.includes(String(t.categoryId));
           return typeOk && catOk;
         });
-      }, [transactions, filterType, filterCat]);
+      }, [transactions, filterType, filterCats]);
 
       const availableCats = useMemo(() => {
         if (filterType === 'ALL') return categories;
@@ -81,7 +81,14 @@
 
       function handleTypeFilter(type) {
         setFilterType(type);
-        setFilterCat('');
+        setFilterCats([]);
+      }
+
+      function toggleCat(id) {
+        const sid = String(id);
+        setFilterCats(prev =>
+          prev.includes(sid) ? prev.filter(c => c !== sid) : [...prev, sid]
+        );
       }
 
       return (
@@ -126,9 +133,9 @@
                 </div>
 
                 <div className="card-section">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                    <h2 className="section-title mb-0">Transações</h2>
-                    <div className="d-flex align-items-center gap-2 flex-wrap">
+                  <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                      <h2 className="section-title mb-0">Transações</h2>
                       <div className="d-flex gap-1">
                         {[
                           { v: 'ALL',     l: 'Todas'    },
@@ -142,17 +149,37 @@
                           </button>
                         ))}
                       </div>
-                      <select
-                        className="form-select form-select-sm"
-                        style={{ width: 'auto', minWidth: 140 }}
-                        value={filterCat}
-                        onChange={e => setFilterCat(e.target.value)}>
-                        <option value="">Todas categorias</option>
-                        {availableCats.map(c => (
-                          <option key={c.id} value={String(c.id)}>{c.name}</option>
-                        ))}
-                      </select>
                     </div>
+
+                    {availableCats.length > 0 && (
+                      <div className="d-flex flex-wrap gap-2 align-items-center">
+                        <span className="text-muted" style={{ fontSize: '0.8rem' }}>Categorias:</span>
+                        {availableCats.map(c => {
+                          const active = filterCats.includes(String(c.id));
+                          return (
+                            <button key={c.id}
+                              onClick={() => toggleCat(c.id)}
+                              className="cat-chip"
+                              style={{
+                                '--chip-color': c.color || 'var(--color-accent)',
+                                fontWeight: active ? 700 : 400,
+                                background: active ? (c.color || 'var(--color-accent)') : 'transparent',
+                                color: active ? '#fff' : 'var(--text-secondary)',
+                                borderColor: c.color || 'var(--color-accent)',
+                              }}>
+                              <i className={`bi ${c.icon || 'bi-tag'}`}></i>
+                              {c.name}
+                              {active && <i className="bi bi-x-lg ms-1" style={{ fontSize: '0.65rem' }}></i>}
+                            </button>
+                          );
+                        })}
+                        {filterCats.length > 0 && (
+                          <button className="btn btn-sm btn-link p-0 text-muted" onClick={() => setFilterCats([])}>
+                            Limpar
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {filtered.length === 0 ? (
