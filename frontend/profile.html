@@ -26,72 +26,350 @@
   <script src="components/sidebar.js"></script>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
     const user = storage.getUser();
 
     const QUESTIONS = [
-      { id: 'renda_mensal',    label: 'Qual é a sua renda mensal aproximada?',
+      { id: 'renda_mensal', icon: 'bi-cash-coin', label: 'Qual é a sua renda mensal aproximada?',
         options: [{ v:'ate_2k', l:'Até R$ 2.000'}, {v:'2k_5k', l:'R$ 2.001 a R$ 5.000'},
-                  { v:'5k_10k', l:'R$ 5.001 a R$ 10.000'}, {v:'acima_10k', l:'Acima de R$ 10.000'}] },
-      { id: 'gasto_mensal',    label: 'Qual percentual da sua renda você gasta mensalmente?',
+                  {v:'5k_10k', l:'R$ 5.001 a R$ 10.000'}, {v:'acima_10k', l:'Acima de R$ 10.000'}] },
+      { id: 'gasto_mensal', icon: 'bi-receipt', label: 'Qual percentual da sua renda você gasta mensalmente?',
         options: [{v:'ate_50', l:'Até 50%'}, {v:'50_80', l:'Entre 50% e 80%'},
                   {v:'80_100', l:'Entre 80% e 100%'}, {v:'acima', l:'Mais do que ganha (endividado)'}] },
-      { id: 'dividas',         label: 'Você possui dívidas atualmente?',
-        options: [{v:'nao', l:'Não'}, {v:'sim_controle', l:'Sim, mas sob controle'},
-                  {v:'sim_pesadas', l:'Sim, e pesando no orçamento'}] },
-      { id: 'objetivo',        label: 'Qual é o seu principal objetivo financeiro?',
-        options: [{v:'emergencia', l:'Reserva de emergência'}, {v:'aposentadoria', l:'Aposentadoria / independência financeira'},
+      { id: 'dividas', icon: 'bi-credit-card', label: 'Você possui dívidas atualmente?',
+        options: [{v:'nao', l:'Não tenho dívidas'}, {v:'sim_controle', l:'Sim, mas estão sob controle'},
+                  {v:'sim_pesadas', l:'Sim, e pesam no orçamento'}] },
+      { id: 'objetivo', icon: 'bi-bullseye', label: 'Qual é o seu principal objetivo financeiro?',
+        options: [{v:'emergencia', l:'Reserva de emergência'}, {v:'aposentadoria', l:'Aposentadoria / independência'},
                   {v:'compra_bem', l:'Comprar um bem (imóvel, carro)'}, {v:'renda_extra', l:'Gerar renda passiva'}] },
-      { id: 'horizonte',       label: 'Em quanto tempo deseja atingir seu objetivo?',
+      { id: 'horizonte', icon: 'bi-calendar-range', label: 'Em quanto tempo deseja atingir seu objetivo?',
         options: [{v:'curto', l:'Curto prazo (até 2 anos)'}, {v:'medio', l:'Médio prazo (2 a 5 anos)'},
                   {v:'longo', l:'Longo prazo (mais de 5 anos)'}] },
-      { id: 'ja_investe',      label: 'Você já investe atualmente?',
+      { id: 'ja_investe', icon: 'bi-bar-chart', label: 'Você já investe atualmente?',
         options: [{v:'nao', l:'Não, nunca investi'}, {v:'sim_basico', l:'Sim, apenas poupança'},
                   {v:'sim_diversificado', l:'Sim, tenho investimentos diversificados'}] },
-      { id: 'reacao_perdas',   label: 'Se seu investimento perdesse 20% em 1 mês, você:',
+      { id: 'reacao_perdas', icon: 'bi-graph-down-arrow', label: 'Se seu investimento perdesse 20% em um mês, você:',
         options: [{v:'venderia', l:'Venderia tudo para evitar mais perdas'},
                   {v:'preocupado', l:'Esperaria recuperar, mas ficaria preocupado'},
                   {v:'tranquilo', l:'Aproveitaria para investir mais'}] },
-      { id: 'poupanca_mensal', label: 'Quanto do seu salário consegue poupar mensalmente?',
+      { id: 'poupanca_mensal', icon: 'bi-piggy-bank', label: 'Quanto do seu salário consegue poupar mensalmente?',
         options: [{v:'nada', l:'Nada por enquanto'}, {v:'ate_10', l:'Menos de 10%'},
                   {v:'10_30', l:'Entre 10% e 30%'}, {v:'acima_30', l:'Mais de 30%'}] },
     ];
 
-    const RISK_INFO = {
-      CONSERVADOR: { cls: 'conservador', icon: 'bi-shield-check',
-        desc: 'Você prefere segurança e previsibilidade. Indicado: Tesouro Direto, CDB, LCI/LCA.' },
-      MODERADO:    { cls: 'moderado',    icon: 'bi-graph-up',
-        desc: 'Equilíbrio entre segurança e crescimento. Indicado: Fundos mistos, Tesouro IPCA, FIIs.' },
-      ARROJADO:    { cls: 'arrojado',    icon: 'bi-graph-up-arrow',
-        desc: 'Você aceita riscos por maiores retornos. Indicado: Ações, ETFs, FIIs, Criptoativos.' },
+    const PROFILE_DATA = {
+      CONSERVADOR: {
+        cls: 'conservador',
+        icon: 'bi-shield-check',
+        color: '#1d9e63',
+        tagline: 'Segurança em primeiro lugar',
+        desc: 'Você valoriza a preservação do patrimônio e prefere rendimentos previsíveis a grandes oscilações. Seu foco é proteger o que conquistou.',
+        allocation: [
+          { label: 'Renda Fixa',       pct: 70, color: '#1d9e63' },
+          { label: 'Fundos Mistos',    pct: 20, color: '#0891b2' },
+          { label: 'Renda Variável',   pct: 10, color: '#f59e0b' },
+        ],
+        products: [
+          { icon: 'bi-bank',          name: 'Tesouro Selic',      desc: 'Liquidez diária, segurança máxima',          tag: 'Essencial' },
+          { icon: 'bi-building',      name: 'CDB / LCI / LCA',   desc: 'Proteção FGC, rendimento acima da poupança', tag: 'Recomendado' },
+          { icon: 'bi-shield',        name: 'Tesouro IPCA+',      desc: 'Proteção contra inflação no longo prazo',    tag: 'Complementar' },
+          { icon: 'bi-layers',        name: 'Fundos DI',          desc: 'Gestão profissional de renda fixa',          tag: 'Complementar' },
+        ],
+        steps: [
+          'Monte uma reserva de emergência de 6 meses de gastos em Tesouro Selic ou CDB com liquidez diária',
+          'Pesquise CDBs com rentabilidade acima de 100% do CDI em bancos digitais',
+          'Abra conta em uma corretora com acesso ao Tesouro Direto (isenção de taxa na maioria)',
+          'Evite investimentos sem proteção do FGC acima de R$ 250 mil por instituição',
+        ],
+      },
+      MODERADO: {
+        cls: 'moderado',
+        icon: 'bi-graph-up',
+        color: '#d97706',
+        tagline: 'Equilíbrio entre crescimento e segurança',
+        desc: 'Você aceita uma dose de risco em troca de retornos superiores, mas sem abrir mão de uma base sólida de renda fixa.',
+        allocation: [
+          { label: 'Renda Fixa',       pct: 50, color: '#1d9e63' },
+          { label: 'FIIs',             pct: 20, color: '#d97706' },
+          { label: 'Renda Variável',   pct: 20, color: '#e05252' },
+          { label: 'Internacional',    pct: 10, color: '#8b5cf6' },
+        ],
+        products: [
+          { icon: 'bi-shield',        name: 'Tesouro IPCA+',      desc: 'Base de proteção contra inflação',           tag: 'Essencial' },
+          { icon: 'bi-buildings',     name: 'FIIs (Fundos Imob.)',desc: 'Renda mensal e exposição ao imobiliário',    tag: 'Recomendado' },
+          { icon: 'bi-pie-chart',     name: 'ETFs (BOVA11)',      desc: 'Diversificação na bolsa com baixo custo',    tag: 'Recomendado' },
+          { icon: 'bi-globe',         name: 'ETFs Internacionais',desc: 'Proteção cambial e exposição global',        tag: 'Complementar' },
+        ],
+        steps: [
+          'Garanta primeiro a reserva de emergência (3 a 6 meses de gastos) em renda fixa líquida',
+          'Comece com ETFs como BOVA11 para exposição à bolsa com diversificação automática',
+          'Pesquise FIIs de tijolo ou papel com histórico de distribuição consistente',
+          'Defina uma alocação mensal fixa e aporte regularmente, independente do mercado',
+        ],
+      },
+      ARROJADO: {
+        cls: 'arrojado',
+        icon: 'bi-graph-up-arrow',
+        color: '#e05252',
+        tagline: 'Alto potencial de retorno',
+        desc: 'Você tem tolerância alta ao risco e busca maximizar retornos no longo prazo. Oscilações do mercado fazem parte da estratégia.',
+        allocation: [
+          { label: 'Renda Variável',   pct: 50, color: '#e05252' },
+          { label: 'Internacional',    pct: 20, color: '#8b5cf6' },
+          { label: 'FIIs',             pct: 15, color: '#d97706' },
+          { label: 'Renda Fixa',       pct: 15, color: '#1d9e63' },
+        ],
+        products: [
+          { icon: 'bi-graph-up-arrow', name: 'Ações (B3)',        desc: 'Maior potencial de retorno no longo prazo',  tag: 'Essencial' },
+          { icon: 'bi-globe2',        name: 'ETFs Globais',       desc: 'IVVB11, BDRs — diversificação internacional',tag: 'Recomendado' },
+          { icon: 'bi-buildings',     name: 'FIIs',               desc: 'Renda passiva com exposição ao mercado real', tag: 'Recomendado' },
+          { icon: 'bi-currency-bitcoin', name: 'Criptoativos',    desc: 'Alta volatilidade — mantenha abaixo de 5%',  tag: 'Opcional' },
+        ],
+        steps: [
+          'Mantenha uma reserva de emergência separada da carteira de investimentos (mínimo 3 meses)',
+          'Estude análise fundamentalista antes de selecionar ações individuais',
+          'Use dollar-cost averaging — aporte mensalmente independente do preço',
+          'Diversifique entre setores e geografias para reduzir risco não-sistêmico',
+        ],
+      },
     };
 
+    function AllocationBar({ allocation }) {
+      return (
+        <div>
+          <div className="alloc-bar">
+            {allocation.map(a => (
+              <div key={a.label} style={{ width: `${a.pct}%`, background: a.color }}
+                title={`${a.label}: ${a.pct}%`} />
+            ))}
+          </div>
+          <div className="d-flex flex-wrap gap-3 mt-2">
+            {allocation.map(a => (
+              <div key={a.label} className="d-flex align-items-center gap-1" style={{ fontSize: '0.8rem' }}>
+                <span style={{ width: 10, height: 10, borderRadius: 3, background: a.color, display: 'inline-block', flexShrink: 0 }}></span>
+                <span style={{ color: 'var(--text-secondary)' }}>{a.label}</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{a.pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function ProfileResult({ saved, onRedo }) {
+      const data = PROFILE_DATA[saved.riskProfile];
+      if (!data) return null;
+
+      const tagColors = { Essencial: '#1d9e63', Recomendado: '#0426b0', Complementar: '#d97706', Opcional: '#8b5cf6' };
+
+      return (
+        <div className="fade-in">
+          {/* Hero card */}
+          <div className={`profile-hero profile-hero--${data.cls} mb-4`}>
+            <div className="d-flex align-items-center gap-3 mb-3">
+              <div className="profile-hero-icon">
+                <i className={`bi ${data.icon}`}></i>
+              </div>
+              <div>
+                <div className="profile-hero-label">Seu perfil de investidor</div>
+                <div className="profile-hero-name">{saved.riskProfile.charAt(0) + saved.riskProfile.slice(1).toLowerCase()}</div>
+                <div className="profile-hero-tagline">{data.tagline}</div>
+              </div>
+            </div>
+            <p className="profile-hero-desc">{data.desc}</p>
+            <button className="btn btn-sm btn-outline-light mt-1" onClick={onRedo}>
+              <i className="bi bi-arrow-repeat me-1"></i>Refazer questionário
+            </button>
+          </div>
+
+          <div className="row g-4">
+            {/* Alocação sugerida */}
+            <div className="col-lg-6">
+              <div className="card-section h-100">
+                <h2 className="section-title">
+                  <i className="bi bi-pie-chart me-2" style={{ color: data.color }}></i>
+                  Alocação sugerida
+                </h2>
+                <AllocationBar allocation={data.allocation} />
+              </div>
+            </div>
+
+            {/* Produtos recomendados */}
+            <div className="col-lg-6">
+              <div className="card-section h-100">
+                <h2 className="section-title">
+                  <i className="bi bi-star me-2" style={{ color: data.color }}></i>
+                  Produtos recomendados
+                </h2>
+                <div className="d-flex flex-column gap-2">
+                  {data.products.map(p => (
+                    <div key={p.name} className="product-row">
+                      <div className="product-icon" style={{ background: data.color + '22', color: data.color }}>
+                        <i className={`bi ${p.icon}`}></i>
+                      </div>
+                      <div className="flex-grow-1 overflow-hidden">
+                        <div className="d-flex align-items-center gap-2">
+                          <span className="product-name">{p.name}</span>
+                          <span className="product-tag" style={{ background: tagColors[p.tag] + '22', color: tagColors[p.tag] }}>
+                            {p.tag}
+                          </span>
+                        </div>
+                        <div className="product-desc">{p.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Primeiros passos */}
+            <div className="col-12">
+              <div className="card-section">
+                <h2 className="section-title">
+                  <i className="bi bi-list-check me-2" style={{ color: data.color }}></i>
+                  Primeiros passos
+                </h2>
+                <div className="d-flex flex-column gap-3">
+                  {data.steps.map((step, i) => (
+                    <div key={i} className="step-row">
+                      <div className="step-num" style={{ background: data.color }}>{i + 1}</div>
+                      <p className="step-text">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Questionnaire({ onDone }) {
+      const [step,    setStep]    = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [saving,  setSaving]  = useState(false);
+      const [dir,     setDir]     = useState('forward');
+
+      const q = QUESTIONS[step];
+      const total = QUESTIONS.length;
+      const progress = Math.round(((step) / total) * 100);
+      const selected = answers[q.id] || null;
+
+      function choose(v) {
+        const next = { ...answers, [q.id]: v };
+        setAnswers(next);
+        if (step < total - 1) {
+          setDir('forward');
+          setTimeout(() => setStep(s => s + 1), 120);
+        }
+      }
+
+      function goBack() {
+        if (step === 0) return;
+        setDir('back');
+        setTimeout(() => setStep(s => s - 1), 80);
+      }
+
+      async function handleFinish() {
+        setSaving(true);
+        try {
+          const data = await api.post('/profile', { userId: user.id, answers });
+          onDone(data);
+        } finally { setSaving(false); }
+      }
+
+      const isLast = step === total - 1;
+      const allAnswered = QUESTIONS.every(q => answers[q.id]);
+
+      return (
+        <div className="quiz-wrap fade-in">
+          {/* Progresso */}
+          <div className="quiz-progress mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-muted" style={{ fontSize: '0.82rem' }}>
+                Pergunta {step + 1} de {total}
+              </span>
+              <span className="fw-semibold" style={{ color: 'var(--color-accent)', fontSize: '0.82rem' }}>
+                {progress}%
+              </span>
+            </div>
+            <div className="quiz-bar-track">
+              <div className="quiz-bar-fill" style={{ width: `${progress}%` }} />
+            </div>
+            <div className="quiz-dots">
+              {QUESTIONS.map((_, i) => (
+                <div key={i} className={`quiz-dot ${i < step ? 'done' : i === step ? 'current' : ''}`} />
+              ))}
+            </div>
+          </div>
+
+          {/* Pergunta */}
+          <div className="quiz-card">
+            <div className="quiz-q-icon">
+              <i className={`bi ${q.icon}`}></i>
+            </div>
+            <h3 className="quiz-question">{q.label}</h3>
+
+            <div className="d-flex flex-column gap-2 mt-4">
+              {q.options.map(opt => (
+                <button key={opt.v}
+                  className={`quiz-option ${selected === opt.v ? 'selected' : ''}`}
+                  onClick={() => choose(opt.v)}>
+                  <span className="quiz-option-check">
+                    {selected === opt.v
+                      ? <i className="bi bi-check-circle-fill"></i>
+                      : <i className="bi bi-circle"></i>}
+                  </span>
+                  {opt.l}
+                </button>
+              ))}
+            </div>
+
+            <div className="d-flex justify-content-between align-items-center mt-4">
+              <button className="btn btn-outline-secondary btn-sm" onClick={goBack} disabled={step === 0}>
+                <i className="bi bi-chevron-left me-1"></i>Anterior
+              </button>
+
+              {isLast ? (
+                <button className="btn btn-primary-custom px-4"
+                  disabled={saving || !allAnswered} onClick={handleFinish}>
+                  {saving
+                    ? <span className="spinner-border spinner-border-sm"></span>
+                    : <><i className="bi bi-check-circle me-2"></i>Ver meu perfil</>}
+                </button>
+              ) : (
+                <button className="btn btn-primary-custom btn-sm"
+                  disabled={!selected} onClick={() => { setDir('forward'); setStep(s => s + 1); }}>
+                  Próxima<i className="bi bi-chevron-right ms-1"></i>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function InvestorProfile() {
-      const [answers,   setAnswers]   = useState({});
-      const [saved,     setSaved]     = useState(null);
-      const [loading,   setLoading]   = useState(true);
-      const [saving,    setSaving]    = useState(false);
-      const [showForm,  setShowForm]  = useState(false);
+      const [saved,    setSaved]    = useState(null);
+      const [loading,  setLoading]  = useState(true);
+      const [showForm, setShowForm] = useState(false);
 
       useEffect(() => {
         api.get(`/profile?userId=${user.id}`)
           .then(data => { setSaved(data); setShowForm(false); })
-          .catch(() => { setShowForm(true); })
+          .catch(() => setShowForm(true))
           .finally(() => setLoading(false));
       }, []);
 
-      async function handleSubmit(e) {
-        e.preventDefault();
-        setSaving(true);
-        try {
-          const data = await api.post('/profile', { userId: user.id, answers });
-          setSaved(data);
-          setShowForm(false);
-        } finally { setSaving(false); }
+      function handleDone(data) {
+        setSaved(data);
+        setShowForm(false);
       }
 
-      const answered = QUESTIONS.filter(q => answers[q.id]).length;
-      const progress  = Math.round((answered / QUESTIONS.length) * 100);
+      function handleRedo() {
+        setSaved(null);
+        setShowForm(true);
+      }
 
       if (loading) return (
         <div className="app-layout">
@@ -105,80 +383,17 @@
       return (
         <div className="app-layout">
           <Sidebar active="profile.html" />
-
-          <main className="main-content fade-in">
+          <main className="main-content">
             <div className="page-header">
               <h1 className="page-title">Perfil de Investidor</h1>
-              <p className="page-subtitle">Descubra seu perfil e receba orientações personalizadas</p>
+              <p className="page-subtitle">
+                {showForm ? 'Responda as perguntas para descobrir seu perfil' : 'Seu relatório personalizado de investimentos'}
+              </p>
             </div>
 
-            {/* Resultado salvo */}
-            {saved && !showForm && (() => {
-              const info = RISK_INFO[saved.riskProfile];
-              return info ? (
-                <div className="card-section mb-4">
-                  <h2 className="section-title">Seu perfil atual</h2>
-                  <div className="d-flex flex-column gap-3">
-                    <div className={`risk-badge ${info.cls}`}>
-                      <i className={`bi ${info.icon} fs-5`}></i>
-                      {saved.riskProfile.charAt(0) + saved.riskProfile.slice(1).toLowerCase()}
-                    </div>
-                    <p className="mb-0 text-muted">{info.desc}</p>
-                    <button className="btn btn-outline-secondary align-self-start"
-                      onClick={() => { setAnswers({}); setShowForm(true); }}>
-                      <i className="bi bi-arrow-repeat me-1"></i>Refazer questionário
-                    </button>
-                  </div>
-                </div>
-              ) : null;
-            })()}
-
-            {/* Formulário */}
-            {showForm && (
-              <div className="question-card">
-                <div className="mb-4">
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <small className="text-muted">{answered} de {QUESTIONS.length} perguntas respondidas</small>
-                    <small className="fw-semibold" style={{ color: 'var(--color-accent)' }}>{progress}%</small>
-                  </div>
-                  <div className="progress" style={{ height: 6, borderRadius: 10 }}>
-                    <div className="progress-bar" role="progressbar"
-                      style={{ width: `${progress}%`, background: 'var(--color-accent)', borderRadius: 10 }}></div>
-                  </div>
-                </div>
-
-                <form onSubmit={handleSubmit}>
-                  {QUESTIONS.map((q, i) => (
-                    <div key={q.id} className="question-step">
-                      <div className="step-number">{i + 1}</div>
-                      <div className="flex-grow-1">
-                        <label className="form-label fw-semibold mb-2">{q.label}</label>
-                        <select className="form-select" required
-                          value={answers[q.id] || ''}
-                          onChange={e => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}>
-                          <option value="">Selecione...</option>
-                          {q.options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="d-flex justify-content-end mt-3">
-                    <button type="submit" className="btn btn-primary-custom px-4"
-                      disabled={saving || answered < QUESTIONS.length}>
-                      {saving
-                        ? <span className="spinner-border spinner-border-sm"></span>
-                        : <><i className="bi bi-check-circle me-2"></i>Descobrir meu perfil</>}
-                    </button>
-                  </div>
-                  {answered < QUESTIONS.length && (
-                    <p className="text-muted small text-end mt-2">
-                      Responda todas as {QUESTIONS.length} perguntas para continuar
-                    </p>
-                  )}
-                </form>
-              </div>
-            )}
+            {showForm
+              ? <Questionnaire onDone={handleDone} />
+              : <ProfileResult saved={saved} onRedo={handleRedo} />}
           </main>
         </div>
       );

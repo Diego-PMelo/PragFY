@@ -624,39 +624,184 @@ html.light-mode .badge-expense { background: #fee2e2; color: #991b1b; }
 }
 .cat-name { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ── Questionnaire ───────────────────────────────────────────────────────── */
-.question-card {
+/* ── Profile hero card ───────────────────────────────────────────────────── */
+.profile-hero {
+  border-radius: 20px;
+  padding: 2rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.profile-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+}
+.profile-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; right: 60px;
+  width: 130px; height: 130px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.profile-hero--conservador { background: linear-gradient(135deg, #1d9e63, #0d6b45); }
+.profile-hero--moderado    { background: linear-gradient(135deg, #d97706, #a35a04); }
+.profile-hero--arrojado    { background: linear-gradient(135deg, #e05252, #a83030); }
+
+.profile-hero-icon {
+  width: 58px; height: 58px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+.profile-hero-label  { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; }
+.profile-hero-name   { font-size: 1.7rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+.profile-hero-tagline{ font-size: 0.82rem; opacity: 0.85; margin-top: 2px; }
+.profile-hero-desc   { font-size: 0.9rem; opacity: 0.9; margin: 0; max-width: 560px; line-height: 1.6; }
+
+/* ── Allocation bar ──────────────────────────────────────────────────────── */
+.alloc-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  gap: 2px;
+}
+.alloc-bar > div { transition: width 0.6s ease; border-radius: 4px; }
+
+/* ── Product row ─────────────────────────────────────────────────────────── */
+.product-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.product-row:last-child { border-bottom: none; padding-bottom: 0; }
+.product-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.product-name { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+.product-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 1px; }
+.product-tag  {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Steps ───────────────────────────────────────────────────────────────── */
+.step-row  { display: flex; align-items: flex-start; gap: 0.85rem; }
+.step-num  {
+  width: 26px; height: 26px; border-radius: 50%;
+  color: #fff; font-size: 0.75rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-size: 0.875rem; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+
+/* ── Quiz ────────────────────────────────────────────────────────────────── */
+.quiz-wrap { max-width: 620px; }
+
+.quiz-bar-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.quiz-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-primary-lt));
+  border-radius: 10px;
+  transition: width 0.35s ease;
+}
+.quiz-dots {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.quiz-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.2s, transform 0.2s;
+}
+.quiz-dot.done    { background: var(--color-accent); }
+.quiz-dot.current { background: var(--color-accent); transform: scale(1.5); }
+
+.quiz-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 2rem;
   box-shadow: var(--shadow-sm);
-  max-width: 720px;
   transition: background 0.3s;
 }
-.question-step { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
-.step-number {
-  width: 30px; height: 30px;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-primary-lt));
-  color: #fff;
-  border-radius: 50%;
+.quiz-q-icon {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: rgba(4,38,176,0.12);
+  color: var(--color-accent);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 4px;
-  box-shadow: 0 2px 8px rgba(4,38,176,0.35);
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
 }
-.question-label { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem; display: block; }
+html.light-mode .quiz-q-icon { background: rgba(4,38,176,0.08); }
 
-.risk-result {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 2rem;
-  max-width: 720px;
-  box-shadow: var(--shadow-sm);
+.quiz-question {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin: 0;
 }
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-family: var(--font-main);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s, color 0.15s, transform 0.1s;
+}
+.quiz-option:hover {
+  border-color: var(--color-accent);
+  background: rgba(4,38,176,0.06);
+  color: var(--text-primary);
+  transform: translateX(3px);
+}
+.quiz-option.selected {
+  border-color: var(--color-accent);
+  background: rgba(4,38,176,0.1);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+html.light-mode .quiz-option.selected { background: rgba(4,38,176,0.07); }
+
+.quiz-option-check { color: var(--color-accent); font-size: 1.1rem; flex-shrink: 0; line-height: 1; }
+
+/* ── Legacy risk-badge (mantido para compatibilidade) ────────────────────── */
 .risk-badge {
   display: inline-flex; align-items: center; gap: 0.6rem;
   padding: 0.5rem 1.25rem;
