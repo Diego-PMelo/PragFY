@@ -17,7 +17,7 @@ public class CategoriaController {
     private final CategoriaService categoriaService;
 
     @GetMapping
-    public List<CategoriaResponseDTO> ListarPorUsuario(@RequestParam("userId") Long idUsuario) {
+    public List<CategoriaResponseDTO> ListarPorUsuario(@RequestParam("idUsuario") Long idUsuario) {
         return categoriaService.ListarPorUsuario(idUsuario);
     }
 

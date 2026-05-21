@@ -248,7 +248,7 @@
 
     function ProfileResult({ saved, onRedo }) {
       const [selected, setSelected] = useState(null);
-      const data = PROFILE_DATA[saved.riskProfile];
+      const data = PROFILE_DATA[saved.perfilRisco];
       if (!data) return null;
 
       const tagColors = { Essencial: '#1d9e63', Recomendado: '#0426b0', Complementar: '#d97706', Opcional: '#8b5cf6' };
@@ -267,7 +267,7 @@
               </div>
               <div>
                 <div className="profile-hero-label">Seu perfil de investidor</div>
-                <div className="profile-hero-name">{saved.riskProfile.charAt(0) + saved.riskProfile.slice(1).toLowerCase()}</div>
+                <div className="profile-hero-name">{saved.perfilRisco.charAt(0) + saved.perfilRisco.slice(1).toLowerCase()}</div>
                 <div className="profile-hero-tagline">{data.tagline}</div>
               </div>
             </div>
@@ -285,7 +285,7 @@
                   <i className="bi bi-pie-chart me-2" style={{ color: data.color }}></i>
                   Alocação sugerida
                 </h2>
-                <AllocationChecklist allocation={data.allocation} riskProfile={saved.riskProfile} />
+                <AllocationChecklist allocation={data.allocation} riskProfile={saved.perfilRisco} />
               </div>
             </div>
 
@@ -376,7 +376,7 @@
       async function handleFinish() {
         setSaving(true);
         try {
-          const data = await api.post('/profile', { userId: user.id, answers });
+          const data = await api.post('/profile', { idUsuario: user.id, respostas: answers });
           onDone(data);
         } finally { setSaving(false); }
       }
@@ -458,7 +458,7 @@
       const [showForm, setShowForm] = useState(false);
 
       useEffect(() => {
-        api.get(`/profile?userId=${user.id}`)
+        api.get(`/profile?idUsuario=${user.id}`)
           .then(data => { setSaved(data); setShowForm(false); })
           .catch(() => setShowForm(true))
           .finally(() => setLoading(false));

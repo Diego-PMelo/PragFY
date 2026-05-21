@@ -14,7 +14,7 @@ public class PerfilInvestidorController {
     private final PerfilInvestidorService perfilService;
 
     @GetMapping
-    public PerfilResponseDTO BuscarPorUsuario(@RequestParam("userId") Long idUsuario) {
+    public PerfilResponseDTO BuscarPorUsuario(@RequestParam("idUsuario") Long idUsuario) {
         return perfilService.BuscarPorUsuario(idUsuario);
     }
 

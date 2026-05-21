@@ -50,7 +50,7 @@
         setError('');
         setLoading(true);
         try {
-          const user = await api.post('/auth/login', { email, password });
+          const user = await api.post('/auth/login', { email, senha: password });
           storage.setUser(user);
           window.location.href = 'dashboard.html';
         } catch (err) {

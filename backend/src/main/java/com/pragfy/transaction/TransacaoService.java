@@ -32,30 +32,30 @@ public class TransacaoService {
     }
 
     public ResumoMensalDTO ObterResumoMensal(Long idUsuario, int mes, int ano) {
-        LocalDate inicio     = LocalDate.of(ano, mes, 1);
-        LocalDate fim        = inicio.withDayOfMonth(inicio.lengthOfMonth());
-        BigDecimal totalReceita  = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.INCOME,  inicio, fim);
-        BigDecimal totalDespesa  = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.EXPENSE, inicio, fim);
+        LocalDate inicio        = LocalDate.of(ano, mes, 1);
+        LocalDate fim           = inicio.withDayOfMonth(inicio.lengthOfMonth());
+        BigDecimal totalReceita = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.INCOME,  inicio, fim);
+        BigDecimal totalDespesa = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.EXPENSE, inicio, fim);
         return new ResumoMensalDTO(mes, ano, totalReceita, totalDespesa, totalReceita.subtract(totalDespesa));
     }
 
     public TransacaoResponseDTO Criar(TransacaoRequestDTO requisicao) {
-        UsuarioEntity usuario = usuarioRepository.findById(requisicao.userId())
+        UsuarioEntity usuario = usuarioRepository.findById(requisicao.idUsuario())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
 
         CategoriaEntity categoria = null;
-        if (requisicao.categoryId() != null) {
-            categoria = categoriaRepository.findById(requisicao.categoryId())
+        if (requisicao.idCategoria() != null) {
+            categoria = categoriaRepository.findById(requisicao.idCategoria())
                     .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada"));
         }
 
         TransacaoEntity transacao = TransacaoEntity.builder()
                 .usuario(usuario)
                 .categoria(categoria)
-                .valor(requisicao.amount())
-                .descricao(requisicao.description())
-                .data(requisicao.date())
-                .tipo(requisicao.type())
+                .valor(requisicao.valor())
+                .descricao(requisicao.descricao())
+                .data(requisicao.data())
+                .tipo(requisicao.tipo())
                 .build();
 
         return TransacaoResponseDTO.De(transacaoRepository.save(transacao));
@@ -66,16 +66,16 @@ public class TransacaoService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Transação não encontrada"));
 
         CategoriaEntity categoria = null;
-        if (requisicao.categoryId() != null) {
-            categoria = categoriaRepository.findById(requisicao.categoryId())
+        if (requisicao.idCategoria() != null) {
+            categoria = categoriaRepository.findById(requisicao.idCategoria())
                     .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada"));
         }
 
         transacao.setCategoria(categoria);
-        transacao.setValor(requisicao.amount());
-        transacao.setDescricao(requisicao.description());
-        transacao.setData(requisicao.date());
-        transacao.setTipo(requisicao.type());
+        transacao.setValor(requisicao.valor());
+        transacao.setDescricao(requisicao.descricao());
+        transacao.setData(requisicao.data());
+        transacao.setTipo(requisicao.tipo());
 
         return TransacaoResponseDTO.De(transacaoRepository.save(transacao));
     }

@@ -19,9 +19,9 @@ public class UsuarioService {
             throw new RegraDeNegocioException("Email já cadastrado");
         }
         UsuarioEntity usuario = UsuarioEntity.builder()
-                .nome(requisicao.name())
+                .nome(requisicao.nome())
                 .email(requisicao.email())
-                .senha(requisicao.password())
+                .senha(requisicao.senha())
                 .build();
         return UsuarioResponseDTO.De(usuarioRepository.save(usuario));
     }
@@ -29,7 +29,7 @@ public class UsuarioService {
     public UsuarioResponseDTO Autenticar(LoginRequestDTO requisicao) {
         UsuarioEntity usuario = usuarioRepository.BuscarPorEmail(requisicao.email())
                 .orElseThrow(() -> new RegraDeNegocioException("Email ou senha inválidos"));
-        if (!usuario.getSenha().equals(requisicao.password())) {
+        if (!usuario.getSenha().equals(requisicao.senha())) {
             throw new RegraDeNegocioException("Email ou senha inválidos");
         }
         return UsuarioResponseDTO.De(usuario);

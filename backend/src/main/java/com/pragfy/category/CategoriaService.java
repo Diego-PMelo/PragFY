@@ -24,14 +24,14 @@ public class CategoriaService {
     }
 
     public CategoriaResponseDTO Criar(CategoriaRequestDTO requisicao) {
-        UsuarioEntity usuario = usuarioRepository.findById(requisicao.userId())
+        UsuarioEntity usuario = usuarioRepository.findById(requisicao.idUsuario())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
         CategoriaEntity categoria = CategoriaEntity.builder()
                 .usuario(usuario)
-                .nome(requisicao.name())
-                .tipo(requisicao.type())
-                .cor(requisicao.color())
-                .icone(requisicao.icon())
+                .nome(requisicao.nome())
+                .tipo(requisicao.tipo())
+                .cor(requisicao.cor())
+                .icone(requisicao.icone())
                 .build();
         return CategoriaResponseDTO.De(categoriaRepository.save(categoria));
     }
@@ -39,10 +39,10 @@ public class CategoriaService {
     public CategoriaResponseDTO Atualizar(Long id, CategoriaRequestDTO requisicao) {
         CategoriaEntity categoria = categoriaRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada"));
-        categoria.setNome(requisicao.name());
-        categoria.setTipo(requisicao.type());
-        categoria.setCor(requisicao.color());
-        categoria.setIcone(requisicao.icon());
+        categoria.setNome(requisicao.nome());
+        categoria.setTipo(requisicao.tipo());
+        categoria.setCor(requisicao.cor());
+        categoria.setIcone(requisicao.icone());
         return CategoriaResponseDTO.De(categoriaRepository.save(categoria));
     }
 

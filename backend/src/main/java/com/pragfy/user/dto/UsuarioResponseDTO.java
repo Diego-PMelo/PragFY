@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 
 public record UsuarioResponseDTO(
         Long id,
-        String name,
+        String nome,
         String email,
-        LocalDateTime createdAt
+        LocalDateTime criadoEm
 ) {
     public static UsuarioResponseDTO De(UsuarioEntity usuario) {
         return new UsuarioResponseDTO(

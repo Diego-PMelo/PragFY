@@ -76,7 +76,7 @@ function Sidebar({ active }) {
       ),
       e('div', { className: 'sidebar-user' },
         e('i', { className: 'bi bi-person-circle' }),
-        e('span', null, ' ' + (user ? user.name : ''))
+        e('span', null, ' ' + (user ? user.nome : ''))
       ),
       e('button', { className: 'btn-logout', onClick: logout },
         e('i', { className: 'bi bi-box-arrow-left' }),

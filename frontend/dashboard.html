@@ -35,7 +35,7 @@
   <script type="text/babel">
     const { useState, useEffect, useCallback, useMemo, useRef } = React;
     const user = storage.getUser();
-    const EMPTY_FORM = (type) => ({ amount: '', description: '', date: new Date().toISOString().slice(0,10), type, categoryId: '' });
+    const EMPTY_FORM = (tipo) => ({ valor: '', descricao: '', data: new Date().toISOString().slice(0,10), tipo, idCategoria: '' });
 
     const PROFILE_META = {
       CONSERVADOR: {
@@ -89,9 +89,9 @@
         </div>
       );
 
-      const meta = PROFILE_META[profile.riskProfile];
+      const meta = PROFILE_META[profile.perfilRisco];
       if (!meta) return null;
-      const name = profile.riskProfile.charAt(0) + profile.riskProfile.slice(1).toLowerCase();
+      const name = profile.perfilRisco.charAt(0) + profile.perfilRisco.slice(1).toLowerCase();
 
       return (
         <div className="card-section mb-4">
@@ -162,9 +162,9 @@
         setLoading(true);
         try {
           const [s, t, c] = await Promise.all([
-            api.get(`/transactions/summary?userId=${user.id}&month=${month}&year=${year}`),
-            api.get(`/transactions?userId=${user.id}&month=${month}&year=${year}`),
-            api.get(`/categories?userId=${user.id}`)
+            api.get(`/transactions/summary?idUsuario=${user.id}&mes=${month}&ano=${year}`),
+            api.get(`/transactions?idUsuario=${user.id}&mes=${month}&ano=${year}`),
+            api.get(`/categories?idUsuario=${user.id}`)
           ]);
           setSummary(s);
           setTransactions(t);
@@ -182,7 +182,7 @@
 
       useEffect(() => {
         setProfileLoading(true);
-        api.get(`/profile?userId=${user.id}`)
+        api.get(`/profile?idUsuario=${user.id}`)
           .then(p => setProfile(p))
           .catch(() => setProfile(null))
           .finally(() => setProfileLoading(false));
@@ -193,15 +193,15 @@
 
       const filtered = useMemo(() => {
         return transactions.filter(t => {
-          const typeOk = filterType === 'ALL' || t.type === filterType;
-          const catOk  = filterCats.length === 0 || filterCats.includes(String(t.categoryId));
+          const typeOk = filterType === 'ALL' || t.tipo === filterType;
+          const catOk  = filterCats.length === 0 || filterCats.includes(String(t.idCategoria));
           return typeOk && catOk;
         });
       }, [transactions, filterType, filterCats]);
 
       const availableCats = useMemo(() => {
         if (filterType === 'ALL') return categories;
-        return categories.filter(c => c.type === filterType);
+        return categories.filter(c => c.tipo === filterType);
       }, [categories, filterType]);
 
       function handleTypeFilter(type) {
@@ -216,8 +216,8 @@
         );
       }
 
-      function openModal(type) {
-        setForm(EMPTY_FORM(type));
+      function openModal(tipo) {
+        setForm(EMPTY_FORM(tipo));
         setFormError('');
         modalRef.current = new window.bootstrap.Modal(document.getElementById('txModal'));
         modalRef.current.show();
@@ -228,12 +228,12 @@
         setFormError(''); setSaving(true);
         try {
           await api.post('/transactions', {
-            userId: user.id,
-            amount: Number(form.amount),
-            description: form.description,
-            date: form.date,
-            type: form.type,
-            categoryId: form.categoryId || null,
+            idUsuario: user.id,
+            valor: Number(form.valor),
+            descricao: form.descricao,
+            data: form.data,
+            tipo: form.tipo,
+            idCategoria: form.idCategoria || null,
           });
           modalRef.current.hide();
           load();
@@ -242,10 +242,10 @@
         } finally { setSaving(false); }
       }
 
-      const modalCats = useMemo(() => categories.filter(c => c.type === form.type), [categories, form.type]);
+      const modalCats = useMemo(() => categories.filter(c => c.tipo === form.tipo), [categories, form.tipo]);
 
       function startNewCat() {
-        setNewCat({ name: '', color: '#0426b0', icon: 'bi-three-dots' });
+        setNewCat({ nome: '', cor: '#0426b0', icone: 'bi-three-dots' });
       }
 
       async function handleSaveCat(e) {
@@ -253,14 +253,14 @@
         setSavingCat(true);
         try {
           const created = await api.post('/categories', {
-            userId: user.id,
-            name: newCat.name,
-            type: form.type,
-            color: newCat.color,
-            icon: newCat.icon,
+            idUsuario: user.id,
+            nome: newCat.nome,
+            tipo: form.tipo,
+            cor: newCat.cor,
+            icone: newCat.icone,
           });
           setCategories(prev => [...prev, created]);
-          setForm(f => ({ ...f, categoryId: String(created.id) }));
+          setForm(f => ({ ...f, idCategoria: String(created.id) }));
           setNewCat(null);
         } catch (err) {
           setFormError(err.message || 'Erro ao criar categoria');
@@ -292,9 +292,9 @@
               <>
                 <div className="row g-3 mb-4">
                   {[
-                    { cls: 'income',  label: 'Receitas', value: summary?.totalIncome,  icon: 'bi-arrow-up-circle-fill',   type: 'INCOME'  },
-                    { cls: 'expense', label: 'Despesas', value: summary?.totalExpense, icon: 'bi-arrow-down-circle-fill', type: 'EXPENSE' },
-                    { cls: 'balance', label: 'Saldo',    value: summary?.balance,      icon: 'bi-wallet2',                type: null      },
+                    { cls: 'income',  label: 'Receitas', value: summary?.totalReceita,  icon: 'bi-arrow-up-circle-fill',   type: 'INCOME'  },
+                    { cls: 'expense', label: 'Despesas', value: summary?.totalDespesa, icon: 'bi-arrow-down-circle-fill', type: 'EXPENSE' },
+                    { cls: 'balance', label: 'Saldo',    value: summary?.saldo,        icon: 'bi-wallet2',                type: null      },
                   ].map(card => (
                     <div key={card.cls} className="col-md-4">
                       <div
@@ -346,14 +346,14 @@
                               onClick={() => toggleCat(c.id)}
                               className="cat-chip"
                               style={{
-                                '--chip-color': c.color || 'var(--color-accent)',
+                                '--chip-color': c.cor || 'var(--color-accent)',
                                 fontWeight: active ? 700 : 400,
-                                background: active ? (c.color || 'var(--color-accent)') : 'transparent',
+                                background: active ? (c.cor || 'var(--color-accent)') : 'transparent',
                                 color: active ? '#fff' : 'var(--text-secondary)',
-                                borderColor: c.color || 'var(--color-accent)',
+                                borderColor: c.cor || 'var(--color-accent)',
                               }}>
-                              <i className={`bi ${c.icon || 'bi-tag'}`}></i>
-                              {c.name}
+                              <i className={`bi ${c.icone || 'bi-tag'}`}></i>
+                              {c.nome}
                               {active && <i className="bi bi-x-lg ms-1" style={{ fontSize: '0.65rem' }}></i>}
                             </button>
                           );
@@ -388,15 +388,15 @@
                           {filtered.map(t => (
                             <tr key={t.id}>
                               <td>
-                                <span className={`badge rounded-pill ${t.type === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
-                                  {t.type === 'INCOME' ? 'Receita' : 'Despesa'}
+                                <span className={`badge rounded-pill ${t.tipo === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
+                                  {t.tipo === 'INCOME' ? 'Receita' : 'Despesa'}
                                 </span>
                               </td>
-                              <td>{t.description || '—'}</td>
-                              <td>{t.categoryName || '—'}</td>
-                              <td>{new Date(t.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                              <td className={`text-end fw-semibold ${t.type === 'INCOME' ? 'text-success' : 'text-danger'}`}>
-                                {t.type === 'INCOME' ? '+' : '-'} {utils.formatBRL(t.amount)}
+                              <td>{t.descricao || '—'}</td>
+                              <td>{t.nomeCategoria || '—'}</td>
+                              <td>{new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                              <td className={`text-end fw-semibold ${t.tipo === 'INCOME' ? 'text-success' : 'text-danger'}`}>
+                                {t.tipo === 'INCOME' ? '+' : '-'} {utils.formatBRL(t.valor)}
                               </td>
                             </tr>
                           ))}
@@ -412,7 +412,7 @@
               <div>
                 <div className="modal-header modal-header-custom">
                   <h5 className="modal-title">
-                    {form.type === 'INCOME' ? 'Nova receita' : 'Nova despesa'}
+                    {form.tipo === 'INCOME' ? 'Nova receita' : 'Nova despesa'}
                   </h5>
                   <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -423,19 +423,19 @@
                     <div className="mb-3">
                       <label className="form-label fw-semibold">Valor (R$)</label>
                       <input className="form-control" type="number" step="0.01" min="0.01" required
-                        value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} />
+                        value={form.valor} onChange={e => setForm(f => ({ ...f, valor: e.target.value }))} />
                     </div>
 
                     <div className="mb-3">
                       <label className="form-label fw-semibold">Descrição</label>
                       <input className="form-control" type="text" maxLength={255}
-                        value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+                        value={form.descricao} onChange={e => setForm(f => ({ ...f, descricao: e.target.value }))} />
                     </div>
 
                     <div className="mb-3">
                       <label className="form-label fw-semibold">Data</label>
                       <input className="form-control" type="date" required
-                        value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+                        value={form.data} onChange={e => setForm(f => ({ ...f, data: e.target.value }))} />
                     </div>
 
                     <div className="mb-3">
@@ -451,9 +451,9 @@
 
                       {!newCat ? (
                         <select className="form-select"
-                          value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}>
+                          value={form.idCategoria} onChange={e => setForm(f => ({ ...f, idCategoria: e.target.value }))}>
                           <option value="">Sem categoria</option>
-                          {modalCats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                          {modalCats.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
                         </select>
                       ) : (
                         <div className="inline-cat-form">
@@ -467,28 +467,28 @@
 
                           <input className="form-control form-control-sm mb-2" type="text"
                             placeholder="Nome da categoria" maxLength={80} required
-                            value={newCat.name} onChange={e => setNewCat(n => ({ ...n, name: e.target.value }))} />
+                            value={newCat.nome} onChange={e => setNewCat(n => ({ ...n, nome: e.target.value }))} />
 
                           <div className="mb-2">
                             <div className="d-flex gap-1 flex-wrap mb-1">
-                              {CAT_COLORS.map(color => (
-                                <button key={color} type="button"
-                                  onClick={() => setNewCat(n => ({ ...n, color }))}
+                              {CAT_COLORS.map(cor => (
+                                <button key={cor} type="button"
+                                  onClick={() => setNewCat(n => ({ ...n, cor }))}
                                   style={{
-                                    width: 24, height: 24, background: color, border: 'none',
+                                    width: 24, height: 24, background: cor, border: 'none',
                                     borderRadius: '50%', cursor: 'pointer',
-                                    outline: newCat.color === color ? `3px solid ${color}` : 'none',
+                                    outline: newCat.cor === cor ? `3px solid ${cor}` : 'none',
                                     outlineOffset: 2,
                                   }} />
                               ))}
                             </div>
                             <div className="d-flex gap-1 flex-wrap">
-                              {CAT_ICONS.map(icon => (
-                                <button key={icon} type="button"
-                                  onClick={() => setNewCat(n => ({ ...n, icon }))}
-                                  className={`btn btn-sm p-1 ${newCat.icon === icon ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                              {CAT_ICONS.map(icone => (
+                                <button key={icone} type="button"
+                                  onClick={() => setNewCat(n => ({ ...n, icone }))}
+                                  className={`btn btn-sm p-1 ${newCat.icone === icone ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
                                   style={{ width: 32, height: 32, lineHeight: 1 }}>
-                                  <i className={`bi ${icon}`} style={{ fontSize: '0.85rem' }}></i>
+                                  <i className={`bi ${icone}`} style={{ fontSize: '0.85rem' }}></i>
                                 </button>
                               ))}
                             </div>
@@ -498,17 +498,17 @@
                             <div className="d-flex align-items-center gap-2">
                               <div style={{
                                 width: 28, height: 28, borderRadius: '50%',
-                                background: newCat.color, display: 'flex',
+                                background: newCat.cor, display: 'flex',
                                 alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                               }}>
-                                <i className={`bi ${newCat.icon} text-white`} style={{ fontSize: '0.75rem' }}></i>
+                                <i className={`bi ${newCat.icone} text-white`} style={{ fontSize: '0.75rem' }}></i>
                               </div>
                               <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                                {newCat.name || 'Prévia'}
+                                {newCat.nome || 'Prévia'}
                               </span>
                             </div>
                             <button type="button" className="btn btn-sm btn-primary-custom"
-                              disabled={savingCat || !newCat.name.trim()} onClick={handleSaveCat}>
+                              disabled={savingCat || !newCat.nome.trim()} onClick={handleSaveCat}>
                               {savingCat
                                 ? <span className="spinner-border spinner-border-sm"></span>
                                 : <><i className="bi bi-check2 me-1"></i>Criar</>}

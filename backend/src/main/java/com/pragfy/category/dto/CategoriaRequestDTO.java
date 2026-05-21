@@ -5,15 +5,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CategoriaRequestDTO(
-        @NotNull(message = "userId é obrigatório")
-        Long userId,
+        @NotNull(message = "idUsuario é obrigatório")
+        Long idUsuario,
 
         @NotBlank(message = "Nome é obrigatório")
-        String name,
+        String nome,
 
         @NotNull(message = "Tipo é obrigatório (INCOME ou EXPENSE)")
-        ECategoriaTipo type,
+        ECategoriaTipo tipo,
 
-        String color,
-        String icon
+        String cor,
+        String icone
 ) {}

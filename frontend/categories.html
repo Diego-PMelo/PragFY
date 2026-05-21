@@ -44,7 +44,7 @@
       { v: 'bi-briefcase',   l: 'Salário'    }, { v: 'bi-graph-up',     l: 'Investimento'},
       { v: 'bi-gift',        l: 'Presente'   }, { v: 'bi-three-dots',   l: 'Outros'     },
     ];
-    const EMPTY = { name: '', type: 'EXPENSE', color: '#0426b0', icon: 'bi-three-dots' };
+    const EMPTY = { nome: '', tipo: 'EXPENSE', cor: '#0426b0', icone: 'bi-three-dots' };
 
     function Categories() {
       const [categories, setCategories] = useState([]);
@@ -58,7 +58,7 @@
 
       const load = useCallback(async () => {
         setLoading(true);
-        try { setCategories(await api.get(`/categories?userId=${user.id}`)); }
+        try { setCategories(await api.get(`/categories?idUsuario=${user.id}`)); }
         finally { setLoading(false); }
       }, []);
 
@@ -67,7 +67,7 @@
       function openModal(c = null) {
         setError('');
         setEditId(c ? c.id : null);
-        setForm(c ? { name: c.name, type: c.type, color: c.color || '#0426b0', icon: c.icon || 'bi-three-dots' } : EMPTY);
+        setForm(c ? { nome: c.nome, tipo: c.tipo, cor: c.cor || '#0426b0', icone: c.icone || 'bi-three-dots' } : EMPTY);
         modalRef.current = new window.bootstrap.Modal(document.getElementById('catModal'));
         modalRef.current.show();
       }
@@ -76,7 +76,7 @@
         e.preventDefault();
         setError(''); setSaving(true);
         try {
-          const payload = { userId: user.id, ...form };
+          const payload = { idUsuario: user.id, ...form };
           if (editId) await api.put(`/categories/${editId}`, payload);
           else        await api.post('/categories', payload);
           modalRef.current.hide();
@@ -92,7 +92,7 @@
         load();
       }
 
-      const filtered = filter === 'ALL' ? categories : categories.filter(c => c.type === filter);
+      const filtered = filter === 'ALL' ? categories : categories.filter(c => c.tipo === filter);
 
       return (
         <div className="app-layout">
@@ -137,13 +137,13 @@
                       <div className="card border-0 shadow-sm h-100" style={{ borderRadius: 12 }}>
                         <div className="card-body d-flex align-items-center gap-3 py-3">
                           <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                            style={{ width: 44, height: 44, background: c.color || '#0426b0' }}>
-                            <i className={`bi ${c.icon || 'bi-tag'} text-white`}></i>
+                            style={{ width: 44, height: 44, background: c.cor || '#0426b0' }}>
+                            <i className={`bi ${c.icone || 'bi-tag'} text-white`}></i>
                           </div>
                           <div className="flex-grow-1 overflow-hidden">
-                            <div className="fw-semibold text-truncate">{c.name}</div>
-                            <span className={`badge rounded-pill small ${c.type === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
-                              {c.type === 'INCOME' ? 'Receita' : 'Despesa'}
+                            <div className="fw-semibold text-truncate">{c.nome}</div>
+                            <span className={`badge rounded-pill small ${c.tipo === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
+                              {c.tipo === 'INCOME' ? 'Receita' : 'Despesa'}
                             </span>
                           </div>
                           <div className="d-flex flex-column gap-1">
@@ -175,7 +175,7 @@
                     <div className="mb-3">
                       <label className="form-label fw-semibold">Nome</label>
                       <input className="form-control" type="text" maxLength={80} required
-                        value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+                        value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} />
                     </div>
 
                     <div className="mb-3">
@@ -184,8 +184,8 @@
                         {['EXPENSE','INCOME'].map(tp => (
                           <div key={tp} className="form-check">
                             <input className="form-check-input" type="radio" name="catType"
-                              id={`catType_${tp}`} value={tp} checked={form.type === tp}
-                              onChange={e => setForm(f => ({ ...f, type: e.target.value }))} />
+                              id={`catType_${tp}`} value={tp} checked={form.tipo === tp}
+                              onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))} />
                             <label className="form-check-label" htmlFor={`catType_${tp}`}>
                               {tp === 'INCOME' ? 'Receita' : 'Despesa'}
                             </label>
@@ -197,10 +197,10 @@
                     <div className="mb-3">
                       <label className="form-label fw-semibold">Cor</label>
                       <div className="d-flex gap-2 flex-wrap">
-                        {COLORS.map(color => (
-                          <button key={color} type="button" onClick={() => setForm(f => ({ ...f, color }))}
-                            style={{ width: 32, height: 32, background: color, border: 'none', borderRadius: '50%',
-                              cursor: 'pointer', outline: form.color === color ? `3px solid ${color}` : 'none',
+                        {COLORS.map(cor => (
+                          <button key={cor} type="button" onClick={() => setForm(f => ({ ...f, cor }))}
+                            style={{ width: 32, height: 32, background: cor, border: 'none', borderRadius: '50%',
+                              cursor: 'pointer', outline: form.cor === cor ? `3px solid ${cor}` : 'none',
                               outlineOffset: 2 }} />
                         ))}
                       </div>
@@ -211,8 +211,8 @@
                       <div className="d-flex gap-2 flex-wrap">
                         {ICONS.map(icon => (
                           <button key={icon.v} type="button" title={icon.l}
-                            onClick={() => setForm(f => ({ ...f, icon: icon.v }))}
-                            className={`btn btn-sm ${form.icon === icon.v ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                            onClick={() => setForm(f => ({ ...f, icone: icon.v }))}
+                            className={`btn btn-sm ${form.icone === icon.v ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
                             style={{ width: 40, height: 40 }}>
                             <i className={`bi ${icon.v}`}></i>
                           </button>
@@ -222,10 +222,10 @@
 
                     <div className="d-flex align-items-center gap-2 p-2 bg-light rounded">
                       <div className="rounded-circle d-flex align-items-center justify-content-center"
-                        style={{ width: 40, height: 40, background: form.color }}>
-                        <i className={`bi ${form.icon} text-white`}></i>
+                        style={{ width: 40, height: 40, background: form.cor }}>
+                        <i className={`bi ${form.icone} text-white`}></i>
                       </div>
-                      <span className="fw-semibold">{form.name || 'Prévia'}</span>
+                      <span className="fw-semibold">{form.nome || 'Prévia'}</span>
                     </div>
                   </div>
                   <div className="modal-footer">

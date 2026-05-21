@@ -19,17 +19,17 @@ public class TransacaoController {
 
     @GetMapping
     public List<TransacaoResponseDTO> ListarPorUsuarioEMes(
-            @RequestParam("userId") Long idUsuario,
-            @RequestParam("month") int mes,
-            @RequestParam("year") int ano) {
+            @RequestParam("idUsuario") Long idUsuario,
+            @RequestParam("mes") int mes,
+            @RequestParam("ano") int ano) {
         return transacaoService.ListarPorUsuarioEMes(idUsuario, mes, ano);
     }
 
     @GetMapping("/summary")
     public ResumoMensalDTO ObterResumoMensal(
-            @RequestParam("userId") Long idUsuario,
-            @RequestParam("month") int mes,
-            @RequestParam("year") int ano) {
+            @RequestParam("idUsuario") Long idUsuario,
+            @RequestParam("mes") int mes,
+            @RequestParam("ano") int ano) {
         return transacaoService.ObterResumoMensal(idUsuario, mes, ano);
     }
 

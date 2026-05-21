@@ -7,20 +7,20 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record TransacaoRequestDTO(
-        @NotNull(message = "userId é obrigatório")
-        Long userId,
+        @NotNull(message = "idUsuario é obrigatório")
+        Long idUsuario,
 
-        Long categoryId,
+        Long idCategoria,
 
         @NotNull(message = "Valor é obrigatório")
         @Positive(message = "Valor deve ser positivo")
-        BigDecimal amount,
+        BigDecimal valor,
 
-        String description,
+        String descricao,
 
         @NotNull(message = "Data é obrigatória")
-        LocalDate date,
+        LocalDate data,
 
         @NotNull(message = "Tipo é obrigatório (INCOME ou EXPENSE)")
-        ETransacaoTipo type
+        ETransacaoTipo tipo
 ) {}

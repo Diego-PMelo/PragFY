@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
 
 public record PerfilResponseDTO(
         Long id,
-        Long userId,
-        EPerfilRisco riskProfile,
-        LocalDateTime updatedAt
+        Long idUsuario,
+        EPerfilRisco perfilRisco,
+        LocalDateTime atualizadoEm
 ) {
     public static PerfilResponseDTO De(PerfilInvestidorEntity perfil) {
         return new PerfilResponseDTO(

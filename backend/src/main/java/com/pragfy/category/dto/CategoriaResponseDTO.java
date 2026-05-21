@@ -5,11 +5,11 @@ import com.pragfy.category.ECategoriaTipo;
 
 public record CategoriaResponseDTO(
         Long id,
-        Long userId,
-        String name,
-        ECategoriaTipo type,
-        String color,
-        String icon
+        Long idUsuario,
+        String nome,
+        ECategoriaTipo tipo,
+        String cor,
+        String icone
 ) {
     public static CategoriaResponseDTO De(CategoriaEntity categoria) {
         return new CategoriaResponseDTO(

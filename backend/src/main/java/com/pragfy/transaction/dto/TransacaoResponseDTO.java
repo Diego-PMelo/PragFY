@@ -7,13 +7,13 @@ import java.time.LocalDate;
 
 public record TransacaoResponseDTO(
         Long id,
-        Long userId,
-        Long categoryId,
-        String categoryName,
-        BigDecimal amount,
-        String description,
-        LocalDate date,
-        ETransacaoTipo type
+        Long idUsuario,
+        Long idCategoria,
+        String nomeCategoria,
+        BigDecimal valor,
+        String descricao,
+        LocalDate data,
+        ETransacaoTipo tipo
 ) {
     public static TransacaoResponseDTO De(TransacaoEntity transacao) {
         return new TransacaoResponseDTO(
