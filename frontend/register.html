@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script src="services/theme.js"></script>
 </head>
 <body>
   <script src="services/storage.js"></script>
@@ -31,6 +32,16 @@
       const [showPass, setShowPass] = useState(false);
       const [error,    setError]    = useState('');
       const [loading,  setLoading]  = useState(false);
+      const [theme,    setTheme]    = useState(localStorage.getItem('pragfy_theme') || 'dark');
+
+      function toggleTheme() {
+        const next = theme === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+        localStorage.setItem('pragfy_theme', next);
+        document.documentElement.setAttribute('data-bs-theme', next);
+        if (next === 'light') document.documentElement.classList.add('light-mode');
+        else document.documentElement.classList.remove('light-mode');
+      }
 
       const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
@@ -52,6 +63,9 @@
       return (
         <div className="auth-page">
           <img src="assets/LogoBg.png" className="gear-bg" alt="" />
+          <button className="btn-theme-float" onClick={toggleTheme} aria-label="Alternar tema">
+            <i className={theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill'}></i>
+          </button>
 
           <div className="auth-card fade-in">
             <div className="auth-logo">
