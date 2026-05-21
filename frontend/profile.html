@@ -176,23 +176,49 @@
       );
     }
 
-    function AllocationBar({ allocation }) {
+    function AllocationChecklist({ allocation, riskProfile }) {
+      const storageKey = `pragfy_alloc_${user.id}_${riskProfile}`;
+      const [checked, setChecked] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); }
+        catch { return {}; }
+      });
+
+      function toggle(label) {
+        setChecked(prev => {
+          const next = { ...prev, [label]: !prev[label] };
+          localStorage.setItem(storageKey, JSON.stringify(next));
+          return next;
+        });
+      }
+
+      const done = allocation.filter(a => checked[a.label]).length;
+
       return (
         <div>
-          <div className="alloc-bar">
+          <div className="alloc-bar mb-3">
             {allocation.map(a => (
-              <div key={a.label} style={{ width: `${a.pct}%`, background: a.color }}
+              <div key={a.label} style={{ width: `${a.pct}%`, background: a.color, opacity: checked[a.label] ? 1 : 0.35, transition: 'opacity 0.3s' }}
                 title={`${a.label}: ${a.pct}%`} />
             ))}
           </div>
-          <div className="d-flex flex-wrap gap-3 mt-2">
+
+          <div className="d-flex flex-column gap-2">
             {allocation.map(a => (
-              <div key={a.label} className="d-flex align-items-center gap-1" style={{ fontSize: '0.8rem' }}>
-                <span style={{ width: 10, height: 10, borderRadius: 3, background: a.color, display: 'inline-block', flexShrink: 0 }}></span>
-                <span style={{ color: 'var(--text-secondary)' }}>{a.label}</span>
-                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{a.pct}%</span>
-              </div>
+              <label key={a.label} className={`alloc-check-row ${checked[a.label] ? 'alloc-check-row--done' : ''}`}
+                onClick={() => toggle(a.label)}>
+                <span className="alloc-dot" style={{ background: a.color }} />
+                <span className="alloc-label">{a.label}</span>
+                <span className="alloc-pct">{a.pct}%</span>
+                <span className={`alloc-checkbox ${checked[a.label] ? 'alloc-checkbox--checked' : ''}`}
+                  style={{ '--chk-color': a.color }}>
+                  {checked[a.label] && <i className="bi bi-check-lg"></i>}
+                </span>
+              </label>
             ))}
+          </div>
+
+          <div className="alloc-progress-label">
+            {done} de {allocation.length} alocações concluídas
           </div>
         </div>
       );
@@ -237,7 +263,7 @@
                   <i className="bi bi-pie-chart me-2" style={{ color: data.color }}></i>
                   Alocação sugerida
                 </h2>
-                <AllocationBar allocation={data.allocation} />
+                <AllocationChecklist allocation={data.allocation} riskProfile={saved.riskProfile} />
               </div>
             </div>
 

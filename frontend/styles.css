@@ -801,6 +801,60 @@ html.light-mode .quiz-option.selected { background: rgba(4,38,176,0.07); }
 
 .quiz-option-check { color: var(--color-accent); font-size: 1.1rem; flex-shrink: 0; line-height: 1; }
 
+/* ── Allocation checklist ────────────────────────────────────────────────── */
+.alloc-check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.2s;
+  user-select: none;
+}
+.alloc-check-row:hover { background: rgba(128,128,160,0.07); }
+.alloc-check-row--done { opacity: 0.65; }
+
+.alloc-dot {
+  width: 12px; height: 12px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.alloc-label {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.alloc-pct {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 36px;
+  text-align: right;
+}
+.alloc-checkbox {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+  color: #fff;
+}
+.alloc-checkbox--checked {
+  background: var(--chk-color);
+  border-color: var(--chk-color);
+}
+.alloc-progress-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 0.6rem;
+}
+
 /* ── Detail modal (perfil investidor) ───────────────────────────────────── */
 .detail-modal-backdrop {
   position: fixed;
