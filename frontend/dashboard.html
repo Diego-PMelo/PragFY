@@ -50,7 +50,15 @@
       const [form,         setForm]         = useState(EMPTY_FORM('EXPENSE'));
       const [saving,       setSaving]       = useState(false);
       const [formError,    setFormError]    = useState('');
+      const [newCat,       setNewCat]       = useState(null);
+      const [savingCat,    setSavingCat]    = useState(false);
       const modalRef = useRef(null);
+
+      const CAT_COLORS = ['#0426b0','#1a9e5c','#e55353','#f59e0b','#8b5cf6','#0891b2','#db2777','#65a30d'];
+      const CAT_ICONS  = [
+        'bi-house','bi-cart','bi-car-front','bi-heart-pulse','bi-book','bi-controller',
+        'bi-phone','bi-lightning','bi-briefcase','bi-graph-up','bi-gift','bi-three-dots',
+      ];
 
       const load = useCallback(async () => {
         setLoading(true);
@@ -129,6 +137,29 @@
       }
 
       const modalCats = useMemo(() => categories.filter(c => c.type === form.type), [categories, form.type]);
+
+      function startNewCat() {
+        setNewCat({ name: '', color: '#0426b0', icon: 'bi-three-dots' });
+      }
+
+      async function handleSaveCat(e) {
+        e.preventDefault();
+        setSavingCat(true);
+        try {
+          const created = await api.post('/categories', {
+            userId: user.id,
+            name: newCat.name,
+            type: form.type,
+            color: newCat.color,
+            icon: newCat.icon,
+          });
+          setCategories(prev => [...prev, created]);
+          setForm(f => ({ ...f, categoryId: String(created.id) }));
+          setNewCat(null);
+        } catch (err) {
+          setFormError(err.message || 'Erro ao criar categoria');
+        } finally { setSavingCat(false); }
+      }
 
       return (
         <div className="app-layout">
@@ -300,12 +331,83 @@
                     </div>
 
                     <div className="mb-3">
-                      <label className="form-label fw-semibold">Categoria</label>
-                      <select className="form-select"
-                        value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}>
-                        <option value="">Sem categoria</option>
-                        {modalCats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
+                      <div className="d-flex justify-content-between align-items-center mb-1">
+                        <label className="form-label fw-semibold mb-0">Categoria</label>
+                        {!newCat && (
+                          <button type="button" className="btn btn-sm btn-link p-0"
+                            style={{ fontSize: '0.8rem' }} onClick={startNewCat}>
+                            <i className="bi bi-plus-circle me-1"></i>Nova categoria
+                          </button>
+                        )}
+                      </div>
+
+                      {!newCat ? (
+                        <select className="form-select"
+                          value={form.categoryId} onChange={e => setForm(f => ({ ...f, categoryId: e.target.value }))}>
+                          <option value="">Sem categoria</option>
+                          {modalCats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                      ) : (
+                        <div className="inline-cat-form">
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span className="fw-semibold" style={{ fontSize: '0.85rem' }}>Nova categoria</span>
+                            <button type="button" className="btn btn-sm btn-link p-0 text-muted"
+                              onClick={() => setNewCat(null)}>
+                              <i className="bi bi-x-lg"></i>
+                            </button>
+                          </div>
+
+                          <input className="form-control form-control-sm mb-2" type="text"
+                            placeholder="Nome da categoria" maxLength={80} required
+                            value={newCat.name} onChange={e => setNewCat(n => ({ ...n, name: e.target.value }))} />
+
+                          <div className="mb-2">
+                            <div className="d-flex gap-1 flex-wrap mb-1">
+                              {CAT_COLORS.map(color => (
+                                <button key={color} type="button"
+                                  onClick={() => setNewCat(n => ({ ...n, color }))}
+                                  style={{
+                                    width: 24, height: 24, background: color, border: 'none',
+                                    borderRadius: '50%', cursor: 'pointer',
+                                    outline: newCat.color === color ? `3px solid ${color}` : 'none',
+                                    outlineOffset: 2,
+                                  }} />
+                              ))}
+                            </div>
+                            <div className="d-flex gap-1 flex-wrap">
+                              {CAT_ICONS.map(icon => (
+                                <button key={icon} type="button"
+                                  onClick={() => setNewCat(n => ({ ...n, icon }))}
+                                  className={`btn btn-sm p-1 ${newCat.icon === icon ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                                  style={{ width: 32, height: 32, lineHeight: 1 }}>
+                                  <i className={`bi ${icon}`} style={{ fontSize: '0.85rem' }}></i>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="d-flex align-items-center justify-content-between gap-2">
+                            <div className="d-flex align-items-center gap-2">
+                              <div style={{
+                                width: 28, height: 28, borderRadius: '50%',
+                                background: newCat.color, display: 'flex',
+                                alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                              }}>
+                                <i className={`bi ${newCat.icon} text-white`} style={{ fontSize: '0.75rem' }}></i>
+                              </div>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                                {newCat.name || 'Prévia'}
+                              </span>
+                            </div>
+                            <button type="button" className="btn btn-sm btn-primary-custom"
+                              disabled={savingCat || !newCat.name.trim()} onClick={handleSaveCat}>
+                              {savingCat
+                                ? <span className="spinner-border spinner-border-sm"></span>
+                                : <><i className="bi bi-check2 me-1"></i>Criar</>}
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="modal-footer">

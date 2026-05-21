@@ -575,6 +575,15 @@ html.light-mode .badge-expense { background: #fee2e2; color: #991b1b; }
 .empty-state i { font-size: 2.5rem; opacity: 0.5; }
 .empty-state p { margin: 0; font-size: 0.9rem; }
 
+/* ── Inline new-category form (dentro da modal) ─────────────────────────── */
+.inline-cat-form {
+  background: var(--bg-input);
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  transition: background 0.3s, border-color 0.3s;
+}
+
 /* ── Category chip (filtro multi-select) ────────────────────────────────── */
 .cat-chip {
   display: inline-flex;
