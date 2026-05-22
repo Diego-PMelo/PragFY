@@ -44,7 +44,7 @@
       { v: 'bi-briefcase',   l: 'Salário'    }, { v: 'bi-graph-up',     l: 'Investimento'},
       { v: 'bi-gift',        l: 'Presente'   }, { v: 'bi-three-dots',   l: 'Outros'     },
     ];
-    const EMPTY = { nome: '', tipo: 'EXPENSE', cor: '#0426b0', icone: 'bi-three-dots' };
+    const EMPTY = { nome: '', tipo: 'DESPESA', cor: '#0426b0', icone: 'bi-three-dots' };
 
     function Categories() {
       const [categories, setCategories] = useState([]);
@@ -111,11 +111,11 @@
 
             <div className="card-section">
               <div className="d-flex gap-2 mb-3">
-                {['ALL','INCOME','EXPENSE'].map(f => (
+                {['ALL','RECEITA','DESPESA'].map(f => (
                   <button key={f}
                     className={`btn btn-sm ${filter === f ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
                     onClick={() => setFilter(f)}>
-                    {f === 'ALL' ? 'Todas' : f === 'INCOME' ? 'Receitas' : 'Despesas'}
+                    {f === 'ALL' ? 'Todas' : f === 'RECEITA' ? 'Receitas' : 'Despesas'}
                   </button>
                 ))}
               </div>
@@ -142,8 +142,8 @@
                           </div>
                           <div className="flex-grow-1 overflow-hidden">
                             <div className="fw-semibold text-truncate">{c.nome}</div>
-                            <span className={`badge rounded-pill small ${c.tipo === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
-                              {c.tipo === 'INCOME' ? 'Receita' : 'Despesa'}
+                            <span className={`badge rounded-pill small ${c.tipo === 'RECEITA' ? 'badge-income' : 'badge-expense'}`}>
+                              {c.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}
                             </span>
                           </div>
                           <div className="d-flex flex-column gap-1">
@@ -181,13 +181,13 @@
                     <div className="mb-3">
                       <label className="form-label fw-semibold">Tipo</label>
                       <div className="d-flex gap-3">
-                        {['EXPENSE','INCOME'].map(tp => (
+                        {['DESPESA','RECEITA'].map(tp => (
                           <div key={tp} className="form-check">
                             <input className="form-check-input" type="radio" name="catType"
                               id={`catType_${tp}`} value={tp} checked={form.tipo === tp}
                               onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))} />
                             <label className="form-check-label" htmlFor={`catType_${tp}`}>
-                              {tp === 'INCOME' ? 'Receita' : 'Despesa'}
+                              {tp === 'RECEITA' ? 'Receita' : 'Despesa'}
                             </label>
                           </div>
                         ))}

@@ -143,7 +143,7 @@
       const [loading,      setLoading]      = useState(true);
       const [filterType,   setFilterType]   = useState('ALL');
       const [filterCats,   setFilterCats]   = useState([]);
-      const [form,         setForm]         = useState(EMPTY_FORM('EXPENSE'));
+      const [form,         setForm]         = useState(EMPTY_FORM('DESPESA'));
       const [saving,       setSaving]       = useState(false);
       const [formError,    setFormError]    = useState('');
       const [newCat,         setNewCat]         = useState(null);
@@ -292,8 +292,8 @@
               <>
                 <div className="row g-3 mb-4">
                   {[
-                    { cls: 'income',  label: 'Receitas', value: summary?.totalReceita,  icon: 'bi-arrow-up-circle-fill',   type: 'INCOME'  },
-                    { cls: 'expense', label: 'Despesas', value: summary?.totalDespesa, icon: 'bi-arrow-down-circle-fill', type: 'EXPENSE' },
+                    { cls: 'income',  label: 'Receitas', value: summary?.totalReceita,  icon: 'bi-arrow-up-circle-fill',   type: 'RECEITA' },
+                    { cls: 'expense', label: 'Despesas', value: summary?.totalDespesa, icon: 'bi-arrow-down-circle-fill', type: 'DESPESA' },
                     { cls: 'balance', label: 'Saldo',    value: summary?.saldo,        icon: 'bi-wallet2',                type: null      },
                   ].map(card => (
                     <div key={card.cls} className="col-md-4">
@@ -323,9 +323,9 @@
                       <h2 className="section-title mb-0">Transações</h2>
                       <div className="d-flex gap-1">
                         {[
-                          { v: 'ALL',     l: 'Todas'    },
-                          { v: 'INCOME',  l: 'Receitas' },
-                          { v: 'EXPENSE', l: 'Despesas' },
+                          { v: 'ALL',      l: 'Todas'    },
+                          { v: 'RECEITA',  l: 'Receitas' },
+                          { v: 'DESPESA',  l: 'Despesas' },
                         ].map(f => (
                           <button key={f.v}
                             className={`btn btn-sm ${filterType === f.v ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
@@ -388,15 +388,15 @@
                           {filtered.map(t => (
                             <tr key={t.id}>
                               <td>
-                                <span className={`badge rounded-pill ${t.tipo === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
-                                  {t.tipo === 'INCOME' ? 'Receita' : 'Despesa'}
+                                <span className={`badge rounded-pill ${t.tipo === 'RECEITA' ? 'badge-income' : 'badge-expense'}`}>
+                                  {t.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}
                                 </span>
                               </td>
                               <td>{t.descricao || '—'}</td>
                               <td>{t.nomeCategoria || '—'}</td>
                               <td>{new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                              <td className={`text-end fw-semibold ${t.tipo === 'INCOME' ? 'text-success' : 'text-danger'}`}>
-                                {t.tipo === 'INCOME' ? '+' : '-'} {utils.formatBRL(t.valor)}
+                              <td className={`text-end fw-semibold ${t.tipo === 'RECEITA' ? 'text-success' : 'text-danger'}`}>
+                                {t.tipo === 'RECEITA' ? '+' : '-'} {utils.formatBRL(t.valor)}
                               </td>
                             </tr>
                           ))}
@@ -412,7 +412,7 @@
               <div>
                 <div className="modal-header modal-header-custom">
                   <h5 className="modal-title">
-                    {form.tipo === 'INCOME' ? 'Nova receita' : 'Nova despesa'}
+                    {form.tipo === 'RECEITA' ? 'Nova receita' : 'Nova despesa'}
                   </h5>
                   <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
                 </div>

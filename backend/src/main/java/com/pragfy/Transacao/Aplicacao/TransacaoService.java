@@ -37,8 +37,8 @@ public class TransacaoService {
     public ResumoMensalDTO ObterResumoMensal(Long idUsuario, int mes, int ano) {
         LocalDate inicio        = LocalDate.of(ano, mes, 1);
         LocalDate fim           = inicio.withDayOfMonth(inicio.lengthOfMonth());
-        BigDecimal totalReceita = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.INCOME,  inicio, fim);
-        BigDecimal totalDespesa = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.EXPENSE, inicio, fim);
+        BigDecimal totalReceita = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.RECEITA, inicio, fim);
+        BigDecimal totalDespesa = transacaoRepository.SomarPorUsuarioTipoEMes(idUsuario, ETransacaoTipo.DESPESA, inicio, fim);
         return new ResumoMensalDTO(mes, ano, totalReceita, totalDespesa, totalReceita.subtract(totalDespesa));
     }
 

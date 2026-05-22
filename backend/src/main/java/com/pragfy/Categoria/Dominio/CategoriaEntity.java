@@ -5,28 +5,29 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "TB_CATEGORIES")
+@Table(name = "TB_CATEGORIAS")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class CategoriaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_CATEGORIA")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "ID_USUARIO", nullable = false)
     private UsuarioEntity usuario;
 
-    @Column(nullable = false, length = 80)
+    @Column(name = "DS_NOME", nullable = false, length = 80)
     private String nome;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(name = "CD_TIPO", nullable = false, length = 10)
     private ECategoriaTipo tipo;
 
-    @Column(length = 7)
+    @Column(name = "DS_COR", length = 7)
     private String cor;
 
-    @Column(length = 50)
+    @Column(name = "DS_ICONE", length = 50)
     private String icone;
 }

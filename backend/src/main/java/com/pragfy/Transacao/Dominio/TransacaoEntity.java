@@ -8,32 +8,33 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "TB_TRANSACTIONS")
+@Table(name = "TB_TRANSACOES")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class TransacaoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_TRANSACAO")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "ID_USUARIO", nullable = false)
     private UsuarioEntity usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "ID_CATEGORIA")
     private CategoriaEntity categoria;
 
-    @Column(nullable = false, precision = 15, scale = 2)
+    @Column(name = "VL_VALOR", nullable = false, precision = 15, scale = 2)
     private BigDecimal valor;
 
-    @Column(length = 255)
+    @Column(name = "DS_DESCRICAO", length = 255)
     private String descricao;
 
-    @Column(name = "transaction_date", nullable = false)
+    @Column(name = "DT_DATA", nullable = false)
     private LocalDate data;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(name = "CD_TIPO", nullable = false, length = 10)
     private ETransacaoTipo tipo;
 }

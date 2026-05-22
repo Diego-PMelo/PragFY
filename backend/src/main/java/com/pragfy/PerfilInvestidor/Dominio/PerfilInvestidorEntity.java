@@ -6,27 +6,28 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "TB_INVESTOR_PROFILES")
+@Table(name = "TB_PERFIS_INVESTIDOR")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PerfilInvestidorEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_PERFIL")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "ID_USUARIO", nullable = false, unique = true)
     private UsuarioEntity usuario;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "risk_profile", length = 20)
+    @Column(name = "CD_PERFIL_RISCO", length = 20)
     private EPerfilRisco perfilRisco;
 
     @Lob
-    @Column(name = "answers", columnDefinition = "CLOB")
+    @Column(name = "DS_RESPOSTAS", columnDefinition = "CLOB")
     private String respostas;
 
-    @Column(name = "updated_at")
+    @Column(name = "DT_ATUALIZADO_EM")
     private LocalDateTime atualizadoEm;
 
     @PrePersist
