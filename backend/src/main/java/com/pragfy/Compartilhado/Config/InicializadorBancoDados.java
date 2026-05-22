@@ -69,6 +69,7 @@ public class InicializadorBancoDados {
         try {
             ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
             populator.addScript(new ClassPathResource(caminho));
+            populator.setSqlScriptEncoding("UTF-8");
             populator.setSeparator(";");
             populator.setContinueOnError(ignorarErros);
             populator.execute(dataSource);
