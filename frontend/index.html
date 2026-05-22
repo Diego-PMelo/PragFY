@@ -13,7 +13,6 @@
   <script src="services/theme.js"></script>
 </head>
 <body>
-  <!-- Redireciona para dashboard se já estiver logado -->
   <script src="services/storage.js"></script>
   <script>if (storage.getUser()) window.location.replace('dashboard.html');</script>
 
@@ -50,9 +49,9 @@
         setError('');
         setLoading(true);
         try {
-          const user = await api.post('/auth/login', { email, password });
+          const user = await api.post('/auth/login', { email, senha: password });
           storage.setUser(user);
-          window.location.href = 'dashboard.html';
+          window.location.href = 'app.html';
         } catch (err) {
           setError(err.message || 'Email ou senha inválidos');
         } finally {

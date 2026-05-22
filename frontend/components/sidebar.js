@@ -1,18 +1,31 @@
 // Sidebar component — plain React.createElement (sem JSX) para ser reutilizado em todas as páginas
+// Usa hash-based navigation compatível com o SPA (app.html)
 function Sidebar({ active }) {
   const e = React.createElement;
   const { useState, useEffect } = React;
   const user = storage.getUser();
 
-  const [open,  setOpen]  = useState(false);
-  const [theme, setTheme] = useState(localStorage.getItem('pragfy_theme') || 'dark');
+  const [open,        setOpen]        = useState(false);
+  const [theme,       setTheme]       = useState(localStorage.getItem('pragfy_theme') || 'dark');
+  const [currentHash, setCurrentHash] = useState(window.location.hash || '#/dashboard');
+
+  useEffect(() => {
+    const handler = () => setCurrentHash(window.location.hash || '#/dashboard');
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
+  }, []);
 
   const navItems = [
-    { href: 'dashboard.html',    icon: 'bi-grid-fill',           label: 'Dashboard' },
-    { href: 'transactions.html', icon: 'bi-arrow-left-right',    label: 'Transações' },
-    { href: 'categories.html',   icon: 'bi-tag-fill',            label: 'Categorias' },
-    { href: 'profile.html',      icon: 'bi-bar-chart-line-fill', label: 'Perfil Investidor' },
+    { href: 'app.html#/dashboard',    hash: '#/dashboard',    icon: 'bi-grid-fill',           label: 'Dashboard' },
+    { href: 'app.html#/transactions', hash: '#/transactions', icon: 'bi-arrow-left-right',    label: 'Transações' },
+    { href: 'app.html#/categories',   hash: '#/categories',   icon: 'bi-tag-fill',            label: 'Categorias' },
+    { href: 'app.html#/profile',      hash: '#/profile',      icon: 'bi-bar-chart-line-fill', label: 'Perfil Investidor' },
   ];
+
+  // Suporte tanto ao novo estilo (hash) quanto ao legado (nome de arquivo)
+  function isActive(item) {
+    return currentHash === item.hash || active === item.hash || active === item.href;
+  }
 
   function logout() {
     storage.clearUser();
@@ -62,7 +75,7 @@ function Sidebar({ active }) {
         e('a', {
           key: item.href,
           href: item.href,
-          className: 'sidebar-link' + (active === item.href ? ' active' : ''),
+          className: 'sidebar-link' + (isActive(item) ? ' active' : ''),
           onClick: closeSidebar,
         },
           e('i', { className: 'bi ' + item.icon }),
@@ -77,7 +90,7 @@ function Sidebar({ active }) {
       ),
       e('div', { className: 'sidebar-user' },
         e('i', { className: 'bi bi-person-circle' }),
-        e('span', null, ' ' + (user ? user.name : ''))
+        e('span', null, ' ' + (user ? user.nome : ''))
       ),
       e('button', { className: 'btn-logout', onClick: logout },
         e('i', { className: 'bi bi-box-arrow-left' }),

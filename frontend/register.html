@@ -28,7 +28,7 @@
     const { useState } = React;
 
     function Register() {
-      const [form,     setForm]     = useState({ name: '', email: '', password: '', confirm: '' });
+      const [form,     setForm]     = useState({ nome: '', email: '', senha: '', confirmar: '' });
       const [showPass, setShowPass] = useState(false);
       const [error,    setError]    = useState('');
       const [loading,  setLoading]  = useState(false);
@@ -48,10 +48,10 @@
       async function handleSubmit(e) {
         e.preventDefault();
         setError('');
-        if (form.password !== form.confirm) { setError('As senhas não coincidem'); return; }
+        if (form.senha !== form.confirmar) { setError('As senhas não coincidem'); return; }
         setLoading(true);
         try {
-          await api.post('/auth/register', { name: form.name, email: form.email, password: form.password });
+          await api.post('/auth/register', { nome: form.nome, email: form.email, senha: form.senha });
           window.location.href = 'index.html';
         } catch (err) {
           setError(err.message || 'Erro ao criar conta');
@@ -82,8 +82,8 @@
 
               <div className="auth-input-wrap">
                 <i className="bi bi-person input-icon" style={{ fontSize: '1.1rem', color: '#333', left: 13 }}></i>
-                <input type="text" placeholder="Nome completo" value={form.name}
-                  onChange={set('name')} required />
+                <input type="text" placeholder="Nome completo" value={form.nome}
+                  onChange={set('nome')} required />
               </div>
 
               <div className="auth-input-wrap">
@@ -95,7 +95,7 @@
               <div className="auth-input-wrap">
                 <img src="assets/Locker.png" className="input-icon" alt="" style={{ transform: 'scaleX(-1)' }} />
                 <input type={showPass ? 'text' : 'password'} placeholder="Senha"
-                  value={form.password} onChange={set('password')} required minLength={6} />
+                  value={form.senha} onChange={set('senha')} required minLength={6} />
                 <button type="button" className="btn-eye" onClick={() => setShowPass(v => !v)}>
                   <img src="assets/Eye.png" alt="" width={22} style={{ transform: 'scaleX(-1)' }} />
                 </button>
@@ -104,7 +104,7 @@
               <div className="auth-input-wrap">
                 <img src="assets/Locker.png" className="input-icon" alt="" style={{ transform: 'scaleX(-1)' }} />
                 <input type={showPass ? 'text' : 'password'} placeholder="Confirmar senha"
-                  value={form.confirm} onChange={set('confirm')} required />
+                  value={form.confirmar} onChange={set('confirmar')} required />
               </div>
 
               <button type="submit" className="btn-auth" disabled={loading}>

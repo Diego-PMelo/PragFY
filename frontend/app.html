@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PragFY</title>
+  <link rel="icon" href="assets/PragFY_Logo.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="services/theme.js"></script>
+</head>
+<body>
+  <!-- Autenticação: redireciona para login se não há sessão ativa -->
+  <script src="services/storage.js"></script>
+  <script>if (!storage.getUser()) window.location.replace('index.html');</script>
+
+  <!-- Raiz da SPA -->
+  <div id="root"></div>
+
+  <!-- Modais Bootstrap — portais React renderizam aqui -->
+  <div class="modal fade" id="txModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" id="txModalContent"></div>
+    </div>
+  </div>
+  <div class="modal fade" id="catModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" id="catModalContent"></div>
+    </div>
+  </div>
+
+  <!-- CDN: React, ReactDOM, Bootstrap JS, Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Serviços (plain JS) -->
+  <script src="services/api.js"></script>
+  <script src="services/utils.js"></script>
+
+  <!-- Componentes (plain JS — sem JSX) -->
+  <script src="components/profileData.js"></script>
+  <script src="components/sidebar.js"></script>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       SPA — Single Page Application com hash router
+       Rotas:
+         #/dashboard    → Dashboard
+         #/transactions → Transações
+         #/categories   → Categorias
+         #/profile      → Perfil de Investidor
+         qualquer outro → 404 Not Found
+       ══════════════════════════════════════════════════════════════ -->
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useMemo, useRef } = React;
+    const user = storage.getUser();
+
+    // ────────────────────────────────────────────────────────────────
+    // Hook de roteamento por hash
+    // ────────────────────────────────────────────────────────────────
+    function useRoute() {
+      const getHash = () => window.location.hash || '#/dashboard';
+      const [route, setRoute] = useState(getHash);
+      useEffect(() => {
+        const handler = () => setRoute(getHash());
+        window.addEventListener('hashchange', handler);
+        return () => window.removeEventListener('hashchange', handler);
+      }, []);
+      return route;
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    // 404 — Página de erro personalizada
+    // ────────────────────────────────────────────────────────────────
+    function NotFound() {
+      return (
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content d-flex flex-column align-items-center justify-content-center fade-in"
+                style={{ minHeight: '70vh' }}>
+            <div className="text-center">
+              <div style={{ fontSize: '7rem', fontWeight: 800, color: 'var(--color-accent)', lineHeight: 1 }}>
+                404
+              </div>
+              <h2 className="mt-2 mb-1 fw-semibold">Página não encontrada</h2>
+              <p className="text-muted mb-4" style={{ maxWidth: 360, margin: '0 auto 1.5rem' }}>
+                O endereço que você tentou acessar não existe nesta aplicação.
+              </p>
+              <a href="app.html#/dashboard" className="btn btn-primary-custom px-4">
+                <i className="bi bi-house me-2"></i>Voltar ao Dashboard
+              </a>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // DASHBOARD
+    // ════════════════════════════════════════════════════════════════
+    const EMPTY_TX_FORM = (tipo) => ({
+      valor: '', descricao: '', data: new Date().toISOString().slice(0,10), tipo, idCategoria: '',
+    });
+
+    function InvestorProfileCard({ profile, profileLoading }) {
+      if (profileLoading) return null;
+      if (!profile) return (
+        <div className="card-section mb-4 d-flex align-items-center gap-3 flex-wrap">
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'var(--color-accent)22',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <i className="bi bi-person-badge" style={{ color: 'var(--color-accent)', fontSize: '1.25rem' }}></i>
+          </div>
+          <div className="flex-grow-1">
+            <div className="fw-semibold">Perfil de investidor não definido</div>
+            <div className="text-muted" style={{ fontSize: '0.82rem' }}>
+              Responda o questionário e receba recomendações personalizadas de investimento
+            </div>
+          </div>
+          <a href="app.html#/profile" className="btn btn-sm btn-primary-custom">
+            <i className="bi bi-clipboard-check me-1"></i>Definir perfil
+          </a>
+        </div>
+      );
+      const meta = PROFILE_META[profile.perfilRisco];
+      if (!meta) return null;
+      const name = profile.perfilRisco.charAt(0) + profile.perfilRisco.slice(1).toLowerCase();
+      return (
+        <div className="card-section mb-4">
+          <div className="d-flex align-items-center gap-3 flex-wrap">
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: meta.color + '22',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <i className={`bi ${meta.icon}`} style={{ color: meta.color, fontSize: '1.25rem' }}></i>
+            </div>
+            <div className="flex-grow-1">
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <span className="fw-semibold" style={{ fontSize: '0.95rem' }}>Perfil de Investidor</span>
+                <span className="badge" style={{ background: meta.color + '22', color: meta.color,
+                  fontWeight: 600, fontSize: '0.78rem', padding: '3px 10px', borderRadius: 20 }}>
+                  {name}
+                </span>
+              </div>
+              <div className="text-muted" style={{ fontSize: '0.82rem' }}>{meta.tagline}</div>
+            </div>
+            <a href="app.html#/profile" className="btn btn-sm btn-outline-secondary">
+              Ver perfil completo <i className="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+          <div className="mt-3">
+            <div style={{ height: 8, borderRadius: 4, overflow: 'hidden', display: 'flex' }}>
+              {meta.allocation.map(a => (
+                <div key={a.label} style={{ width: `${a.pct}%`, background: a.color, transition: 'width 0.4s' }}
+                  title={`${a.label}: ${a.pct}%`} />
+              ))}
+            </div>
+            <div className="d-flex flex-wrap gap-3 mt-2">
+              {meta.allocation.map(a => (
+                <div key={a.label} className="d-flex align-items-center gap-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: a.color,
+                                 display: 'inline-block', flexShrink: 0 }}></span>
+                  {a.label}&nbsp;<span style={{ color: a.color, fontWeight: 600 }}>{a.pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Dashboard() {
+      const now = new Date();
+      const [month,          setMonth]          = useState(now.getMonth() + 1);
+      const [year,           setYear]           = useState(now.getFullYear());
+      const [summary,        setSummary]        = useState(null);
+      const [transactions,   setTransactions]   = useState([]);
+      const [categories,     setCategories]     = useState([]);
+      const [loading,        setLoading]        = useState(true);
+      const [filterType,     setFilterType]     = useState('ALL');
+      const [filterCats,     setFilterCats]     = useState([]);
+      const [form,           setForm]           = useState(EMPTY_TX_FORM('DESPESA'));
+      const [saving,         setSaving]         = useState(false);
+      const [formError,      setFormError]      = useState('');
+      const [newCat,         setNewCat]         = useState(null);
+      const [savingCat,      setSavingCat]      = useState(false);
+      const [profile,        setProfile]        = useState(null);
+      const [profileLoading, setProfileLoading] = useState(true);
+      const modalRef = useRef(null);
+
+      const CAT_COLORS = ['#0426b0','#1a9e5c','#e55353','#f59e0b','#8b5cf6','#0891b2','#db2777','#65a30d'];
+      const CAT_ICONS  = [
+        'bi-house','bi-cart','bi-car-front','bi-heart-pulse','bi-book','bi-controller',
+        'bi-phone','bi-lightning','bi-briefcase','bi-graph-up','bi-gift','bi-three-dots',
+      ];
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        try {
+          const [s, t, c] = await Promise.all([
+            api.get(`/transactions/summary?idUsuario=${user.id}&mes=${month}&ano=${year}`),
+            api.get(`/transactions?idUsuario=${user.id}&mes=${month}&ano=${year}`),
+            api.get(`/categories?idUsuario=${user.id}`)
+          ]);
+          setSummary(s); setTransactions(t); setCategories(c);
+        } catch {
+          setSummary(null); setTransactions([]); setCategories([]);
+        } finally { setLoading(false); }
+      }, [month, year]);
+
+      useEffect(() => { load(); }, [load]);
+
+      useEffect(() => {
+        setProfileLoading(true);
+        api.get(`/profile?idUsuario=${user.id}`)
+          .then(p => setProfile(p))
+          .catch(() => setProfile(null))
+          .finally(() => setProfileLoading(false));
+      }, []);
+
+      function prevMonth() { if (month === 1) { setMonth(12); setYear(y => y-1); } else setMonth(m => m-1); }
+      function nextMonth() { if (month === 12) { setMonth(1); setYear(y => y+1); } else setMonth(m => m+1); }
+
+      const filtered = useMemo(() => transactions.filter(t => {
+        const typeOk = filterType === 'ALL' || t.tipo === filterType;
+        const catOk  = filterCats.length === 0 || filterCats.includes(String(t.idCategoria));
+        return typeOk && catOk;
+      }), [transactions, filterType, filterCats]);
+
+      const availableCats = useMemo(() =>
+        filterType === 'ALL' ? categories : categories.filter(c => c.tipo === filterType),
+      [categories, filterType]);
+
+      function handleTypeFilter(type) { setFilterType(type); setFilterCats([]); }
+      function toggleCat(id) {
+        const sid = String(id);
+        setFilterCats(prev => prev.includes(sid) ? prev.filter(c => c !== sid) : [...prev, sid]);
+      }
+
+      function openModal(tipo) {
+        setForm(EMPTY_TX_FORM(tipo)); setFormError('');
+        modalRef.current = new window.bootstrap.Modal(document.getElementById('txModal'));
+        modalRef.current.show();
+      }
+
+      async function handleSave(e) {
+        e.preventDefault(); setFormError(''); setSaving(true);
+        try {
+          await api.post('/transactions', {
+            idUsuario: user.id, valor: Number(form.valor),
+            descricao: form.descricao, data: form.data,
+            tipo: form.tipo, idCategoria: form.idCategoria || null,
+          });
+          modalRef.current.hide(); load();
+        } catch (err) { setFormError(err.message || 'Erro ao salvar'); }
+        finally { setSaving(false); }
+      }
+
+      const modalCats = useMemo(() => categories.filter(c => c.tipo === form.tipo), [categories, form.tipo]);
+
+      async function handleSaveCat(e) {
+        e.preventDefault(); setSavingCat(true);
+        try {
+          const created = await api.post('/categories', {
+            idUsuario: user.id, nome: newCat.nome, tipo: form.tipo,
+            cor: newCat.cor, icone: newCat.icone,
+          });
+          setCategories(prev => [...prev, created]);
+          setForm(f => ({ ...f, idCategoria: String(created.id) }));
+          setNewCat(null);
+        } catch (err) { setFormError(err.message || 'Erro ao criar categoria'); }
+        finally { setSavingCat(false); }
+      }
+
+      return (
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content fade-in">
+            <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h1 className="page-title">Dashboard</h1>
+                <p className="page-subtitle">Visão geral das suas finanças</p>
+              </div>
+              <div className="month-picker">
+                <button onClick={prevMonth}><i className="bi bi-chevron-left"></i></button>
+                <span>{utils.MONTHS[month-1]} {year}</span>
+                <button onClick={nextMonth}><i className="bi bi-chevron-right"></i></button>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border" style={{ color: 'var(--color-accent)' }}></div>
+              </div>
+            ) : (
+              <>
+                <div className="row g-3 mb-4">
+                  {[
+                    { cls: 'income',  label: 'Receitas', value: summary?.totalReceita, icon: 'bi-arrow-up-circle-fill',   type: 'RECEITA' },
+                    { cls: 'expense', label: 'Despesas', value: summary?.totalDespesa, icon: 'bi-arrow-down-circle-fill', type: 'DESPESA' },
+                    { cls: 'balance', label: 'Saldo',    value: summary?.saldo,        icon: 'bi-wallet2',                type: null },
+                  ].map(card => (
+                    <div key={card.cls} className="col-md-4">
+                      <div
+                        className={`summary-card ${card.cls} d-flex justify-content-between align-items-center${card.type ? ' summary-card-clickable' : ''}`}
+                        onClick={card.type ? () => openModal(card.type) : undefined}
+                        title={card.type ? `Adicionar ${card.label.slice(0,-1).toLowerCase()}` : undefined}>
+                        <div>
+                          <div className="label">{card.label}</div>
+                          <div className="amount">{utils.formatBRL(card.value)}</div>
+                        </div>
+                        <div className="d-flex flex-column align-items-center gap-1">
+                          <i className={`bi ${card.icon}`}></i>
+                          {card.type && <span style={{ fontSize: '0.65rem', opacity: 0.75, letterSpacing: '0.04em' }}>+ ADICIONAR</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <InvestorProfileCard profile={profile} profileLoading={profileLoading} />
+
+                <div className="card-section">
+                  <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                      <h2 className="section-title mb-0">Transações</h2>
+                      <div className="d-flex gap-1">
+                        {[{ v:'ALL', l:'Todas' }, { v:'RECEITA', l:'Receitas' }, { v:'DESPESA', l:'Despesas' }].map(f => (
+                          <button key={f.v}
+                            className={`btn btn-sm ${filterType === f.v ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                            onClick={() => handleTypeFilter(f.v)}>{f.l}</button>
+                        ))}
+                      </div>
+                    </div>
+                    {availableCats.length > 0 && (
+                      <div className="d-flex flex-wrap gap-2 align-items-center">
+                        <span className="text-muted" style={{ fontSize: '0.8rem' }}>Categorias:</span>
+                        {availableCats.map(c => {
+                          const active = filterCats.includes(String(c.id));
+                          return (
+                            <button key={c.id} onClick={() => toggleCat(c.id)} className="cat-chip"
+                              style={{ '--chip-color': c.cor || 'var(--color-accent)',
+                                fontWeight: active ? 700 : 400,
+                                background: active ? (c.cor || 'var(--color-accent)') : 'transparent',
+                                color: active ? '#fff' : 'var(--text-secondary)',
+                                borderColor: c.cor || 'var(--color-accent)' }}>
+                              <i className={`bi ${c.icone || 'bi-tag'}`}></i>
+                              {c.nome}
+                              {active && <i className="bi bi-x-lg ms-1" style={{ fontSize: '0.65rem' }}></i>}
+                            </button>
+                          );
+                        })}
+                        {filterCats.length > 0 && (
+                          <button className="btn btn-sm btn-link p-0 text-muted" onClick={() => setFilterCats([])}>Limpar</button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {filtered.length === 0 ? (
+                    <div className="text-center py-4 text-muted">
+                      <i className="bi bi-inbox fs-2 d-block mb-2"></i>Nenhuma transação encontrada
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-hover align-middle mb-0">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Tipo</th><th>Descrição</th><th>Categoria</th>
+                            <th>Data</th><th className="text-end">Valor</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map(t => (
+                            <tr key={t.id}>
+                              <td>
+                                <span className={`badge rounded-pill ${t.tipo === 'RECEITA' ? 'badge-income' : 'badge-expense'}`}>
+                                  {t.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}
+                                </span>
+                              </td>
+                              <td>{t.descricao || '—'}</td>
+                              <td>{t.nomeCategoria || '—'}</td>
+                              <td>{new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                              <td className={`text-end fw-semibold ${t.tipo === 'RECEITA' ? 'text-success' : 'text-danger'}`}>
+                                {t.tipo === 'RECEITA' ? '+' : '-'} {utils.formatBRL(t.valor)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {ReactDOM.createPortal(
+              <div>
+                <div className="modal-header modal-header-custom">
+                  <h5 className="modal-title">{form.tipo === 'RECEITA' ? 'Nova receita' : 'Nova despesa'}</h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form onSubmit={handleSave}>
+                  <div className="modal-body">
+                    {formError && <div className="alert alert-danger py-2">{formError}</div>}
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Valor (R$)</label>
+                      <input className="form-control" type="number" step="0.01" min="0.01" required
+                        value={form.valor} onChange={e => setForm(f => ({ ...f, valor: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Descrição</label>
+                      <input className="form-control" type="text" maxLength={255}
+                        value={form.descricao} onChange={e => setForm(f => ({ ...f, descricao: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Data</label>
+                      <input className="form-control" type="date" required
+                        value={form.data} onChange={e => setForm(f => ({ ...f, data: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <div className="d-flex justify-content-between align-items-center mb-1">
+                        <label className="form-label fw-semibold mb-0">Categoria</label>
+                        {!newCat && (
+                          <button type="button" className="btn btn-sm btn-link p-0" style={{ fontSize: '0.8rem' }}
+                            onClick={() => setNewCat({ nome: '', cor: '#0426b0', icone: 'bi-three-dots' })}>
+                            <i className="bi bi-plus-circle me-1"></i>Nova categoria
+                          </button>
+                        )}
+                      </div>
+                      {!newCat ? (
+                        <select className="form-select"
+                          value={form.idCategoria} onChange={e => setForm(f => ({ ...f, idCategoria: e.target.value }))}>
+                          <option value="">Sem categoria</option>
+                          {modalCats.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                        </select>
+                      ) : (
+                        <div className="inline-cat-form">
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span className="fw-semibold" style={{ fontSize: '0.85rem' }}>Nova categoria</span>
+                            <button type="button" className="btn btn-sm btn-link p-0 text-muted"
+                              onClick={() => setNewCat(null)}><i className="bi bi-x-lg"></i></button>
+                          </div>
+                          <input className="form-control form-control-sm mb-2" type="text"
+                            placeholder="Nome da categoria" maxLength={80}
+                            value={newCat.nome} onChange={e => setNewCat(n => ({ ...n, nome: e.target.value }))} />
+                          <div className="mb-2">
+                            <div className="d-flex gap-1 flex-wrap mb-1">
+                              {CAT_COLORS.map(cor => (
+                                <button key={cor} type="button" onClick={() => setNewCat(n => ({ ...n, cor }))}
+                                  style={{ width: 24, height: 24, background: cor, border: 'none',
+                                    borderRadius: '50%', cursor: 'pointer',
+                                    outline: newCat.cor === cor ? `3px solid ${cor}` : 'none', outlineOffset: 2 }} />
+                              ))}
+                            </div>
+                            <div className="d-flex gap-1 flex-wrap">
+                              {CAT_ICONS.map(icone => (
+                                <button key={icone} type="button" onClick={() => setNewCat(n => ({ ...n, icone }))}
+                                  className={`btn btn-sm p-1 ${newCat.icone === icone ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                                  style={{ width: 32, height: 32, lineHeight: 1 }}>
+                                  <i className={`bi ${icone}`} style={{ fontSize: '0.85rem' }}></i>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="d-flex align-items-center justify-content-between gap-2">
+                            <div className="d-flex align-items-center gap-2">
+                              <div style={{ width: 28, height: 28, borderRadius: '50%', background: newCat.cor,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <i className={`bi ${newCat.icone} text-white`} style={{ fontSize: '0.75rem' }}></i>
+                              </div>
+                              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                                {newCat.nome || 'Prévia'}
+                              </span>
+                            </div>
+                            <button type="button" className="btn btn-sm btn-primary-custom"
+                              disabled={savingCat || !newCat.nome.trim()} onClick={handleSaveCat}>
+                              {savingCat
+                                ? <span className="spinner-border spinner-border-sm"></span>
+                                : <><i className="bi bi-check2 me-1"></i>Criar</>}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" className="btn btn-primary-custom" disabled={saving}>
+                      {saving ? <span className="spinner-border spinner-border-sm"></span> : 'Salvar'}
+                    </button>
+                  </div>
+                </form>
+              </div>,
+              document.getElementById('txModalContent')
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // TRANSAÇÕES
+    // ════════════════════════════════════════════════════════════════
+    function Transactions() {
+      const now = new Date();
+      const emptyTx = () => ({ valor: '', descricao: '', data: new Date().toISOString().slice(0,10), tipo: 'DESPESA', idCategoria: '' });
+
+      const [month,        setMonth]        = useState(now.getMonth() + 1);
+      const [year,         setYear]         = useState(now.getFullYear());
+      const [transactions, setTransactions] = useState([]);
+      const [categories,   setCategories]   = useState([]);
+      const [loading,      setLoading]      = useState(true);
+      const [form,         setForm]         = useState(emptyTx());
+      const [editId,       setEditId]       = useState(null);
+      const [saving,       setSaving]       = useState(false);
+      const [error,        setError]        = useState('');
+      const modalRef = useRef(null);
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        try {
+          const [t, c] = await Promise.all([
+            api.get(`/transactions?idUsuario=${user.id}&mes=${month}&ano=${year}`),
+            api.get(`/categories?idUsuario=${user.id}`)
+          ]);
+          setTransactions(t); setCategories(c);
+        } finally { setLoading(false); }
+      }, [month, year]);
+
+      useEffect(() => { load(); }, [load]);
+
+      function prevMonth() { if (month === 1) { setMonth(12); setYear(y => y-1); } else setMonth(m => m-1); }
+      function nextMonth() { if (month === 12) { setMonth(1); setYear(y => y+1); } else setMonth(m => m+1); }
+
+      function openModal(t = null) {
+        setError('');
+        if (t) {
+          setEditId(t.id);
+          setForm({ valor: String(t.valor), descricao: t.descricao || '', data: t.data,
+                    tipo: t.tipo, idCategoria: t.idCategoria ? String(t.idCategoria) : '' });
+        } else {
+          setEditId(null); setForm(emptyTx());
+        }
+        modalRef.current = new window.bootstrap.Modal(document.getElementById('txModal'));
+        modalRef.current.show();
+      }
+
+      async function handleSave(e) {
+        e.preventDefault(); setError(''); setSaving(true);
+        const payload = { idUsuario: user.id, valor: Number(form.valor),
+          descricao: form.descricao, data: form.data, tipo: form.tipo,
+          idCategoria: form.idCategoria || null };
+        try {
+          if (editId) await api.put(`/transactions/${editId}`, payload);
+          else        await api.post('/transactions', payload);
+          modalRef.current.hide(); load();
+        } catch (err) { setError(err.message || 'Erro ao salvar'); }
+        finally { setSaving(false); }
+      }
+
+      async function handleDelete(id) {
+        if (!confirm('Excluir esta transação?')) return;
+        try { await api.del(`/transactions/${id}`); load(); }
+        catch { alert('Erro ao excluir transação'); }
+      }
+
+      const filteredCats = useMemo(() => categories.filter(c => c.tipo === form.tipo), [categories, form.tipo]);
+
+      return (
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content fade-in">
+            <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h1 className="page-title">Transações</h1>
+                <p className="page-subtitle">Gerencie suas receitas e despesas</p>
+              </div>
+              <div className="d-flex align-items-center gap-3 flex-wrap">
+                <div className="month-picker">
+                  <button onClick={prevMonth}><i className="bi bi-chevron-left"></i></button>
+                  <span>{utils.MONTHS[month-1]} {year}</span>
+                  <button onClick={nextMonth}><i className="bi bi-chevron-right"></i></button>
+                </div>
+                <button className="btn btn-primary-custom" onClick={() => openModal()}>
+                  <i className="bi bi-plus-lg me-1"></i>Nova transação
+                </button>
+              </div>
+            </div>
+
+            <div className="card-section">
+              {loading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border" style={{ color: 'var(--color-accent)' }}></div>
+                </div>
+              ) : transactions.length === 0 ? (
+                <div className="text-center py-5 text-muted">
+                  <i className="bi bi-inbox fs-1 d-block mb-2"></i>
+                  <p>Nenhuma transação em {utils.MONTHS[month-1]} {year}</p>
+                  <button className="btn btn-primary-custom mt-2" onClick={() => openModal()}>Adicionar transação</button>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Tipo</th><th>Descrição</th><th>Categoria</th>
+                        <th>Data</th><th className="text-end">Valor</th><th className="text-end">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.map(t => (
+                        <tr key={t.id}>
+                          <td>
+                            <span className={`badge rounded-pill ${t.tipo === 'RECEITA' ? 'badge-income' : 'badge-expense'}`}>
+                              {t.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}
+                            </span>
+                          </td>
+                          <td>{t.descricao || '—'}</td>
+                          <td>{t.nomeCategoria || '—'}</td>
+                          <td>{new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                          <td className={`text-end fw-semibold ${t.tipo === 'RECEITA' ? 'text-success' : 'text-danger'}`}>
+                            {t.tipo === 'RECEITA' ? '+' : '-'} {utils.formatBRL(t.valor)}
+                          </td>
+                          <td className="text-end">
+                            <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => openModal(t)}>
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(t.id)}>
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {ReactDOM.createPortal(
+              <div>
+                <div className="modal-header modal-header-custom">
+                  <h5 className="modal-title">{editId ? 'Editar transação' : 'Nova transação'}</h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" style={{ filter: 'invert(1)' }}></button>
+                </div>
+                <form onSubmit={handleSave}>
+                  <div className="modal-body">
+                    {error && <div className="alert alert-danger py-2">{error}</div>}
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Tipo</label>
+                      <div className="d-flex gap-3">
+                        {[{ v:'DESPESA', l:'Despesa' }, { v:'RECEITA', l:'Receita' }].map(tp => (
+                          <div key={tp.v} className="form-check">
+                            <input className="form-check-input" type="radio" name="txTipo"
+                              id={`txTipo_${tp.v}`} value={tp.v} checked={form.tipo === tp.v}
+                              onChange={e => setForm(f => ({ ...f, tipo: e.target.value, idCategoria: '' }))} />
+                            <label className="form-check-label" htmlFor={`txTipo_${tp.v}`}>{tp.l}</label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Valor (R$)</label>
+                      <input className="form-control" type="number" step="0.01" min="0.01" required
+                        value={form.valor} onChange={e => setForm(f => ({ ...f, valor: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Descrição</label>
+                      <input className="form-control" type="text" maxLength={255}
+                        value={form.descricao} onChange={e => setForm(f => ({ ...f, descricao: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Data</label>
+                      <input className="form-control" type="date" required
+                        value={form.data} onChange={e => setForm(f => ({ ...f, data: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Categoria</label>
+                      <select className="form-select"
+                        value={form.idCategoria} onChange={e => setForm(f => ({ ...f, idCategoria: e.target.value }))}>
+                        <option value="">Sem categoria</option>
+                        {filteredCats.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" className="btn btn-primary-custom" disabled={saving}>
+                      {saving ? <span className="spinner-border spinner-border-sm"></span> : 'Salvar'}
+                    </button>
+                  </div>
+                </form>
+              </div>,
+              document.getElementById('txModalContent')
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // CATEGORIAS
+    // ════════════════════════════════════════════════════════════════
+    const CAT_COLORS = ['#0426b0','#1a9e5c','#e55353','#f59e0b','#8b5cf6','#0891b2','#db2777','#65a30d'];
+    const CAT_ICONS  = [
+      { v: 'bi-house',       l: 'Casa'        }, { v: 'bi-cart',        l: 'Mercado'     },
+      { v: 'bi-car-front',   l: 'Transporte'  }, { v: 'bi-heart-pulse', l: 'Saúde'       },
+      { v: 'bi-book',        l: 'Educação'    }, { v: 'bi-controller',  l: 'Lazer'       },
+      { v: 'bi-phone',       l: 'Telefone'    }, { v: 'bi-lightning',   l: 'Serviços'    },
+      { v: 'bi-briefcase',   l: 'Salário'     }, { v: 'bi-graph-up',    l: 'Investimento'},
+      { v: 'bi-gift',        l: 'Presente'    }, { v: 'bi-three-dots',  l: 'Outros'      },
+    ];
+
+    function Categories() {
+      const emptyCat = { nome: '', tipo: 'DESPESA', cor: '#0426b0', icone: 'bi-three-dots' };
+
+      const [categories, setCategories] = useState([]);
+      const [loading,    setLoading]    = useState(true);
+      const [filter,     setFilter]     = useState('ALL');
+      const [form,       setForm]       = useState(emptyCat);
+      const [editId,     setEditId]     = useState(null);
+      const [saving,     setSaving]     = useState(false);
+      const [error,      setError]      = useState('');
+      const modalRef = useRef(null);
+
+      const load = useCallback(async () => {
+        setLoading(true);
+        try { setCategories(await api.get(`/categories?idUsuario=${user.id}`)); }
+        finally { setLoading(false); }
+      }, []);
+
+      useEffect(() => { load(); }, [load]);
+
+      function openModal(c = null) {
+        setError(''); setEditId(c ? c.id : null);
+        setForm(c ? { nome: c.nome, tipo: c.tipo, cor: c.cor || '#0426b0', icone: c.icone || 'bi-three-dots' } : emptyCat);
+        modalRef.current = new window.bootstrap.Modal(document.getElementById('catModal'));
+        modalRef.current.show();
+      }
+
+      async function handleSave(e) {
+        e.preventDefault(); setError(''); setSaving(true);
+        try {
+          const payload = { idUsuario: user.id, ...form };
+          if (editId) await api.put(`/categories/${editId}`, payload);
+          else        await api.post('/categories', payload);
+          modalRef.current.hide(); load();
+        } catch (err) { setError(err.message || 'Erro ao salvar'); }
+        finally { setSaving(false); }
+      }
+
+      async function handleDelete(id) {
+        if (!confirm('Excluir esta categoria?')) return;
+        try { await api.del(`/categories/${id}`); load(); }
+        catch { alert('Erro ao excluir categoria'); }
+      }
+
+      const filtered = filter === 'ALL' ? categories : categories.filter(c => c.tipo === filter);
+
+      return (
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content fade-in">
+            <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <div>
+                <h1 className="page-title">Categorias</h1>
+                <p className="page-subtitle">Organize suas receitas e despesas</p>
+              </div>
+              <button className="btn btn-primary-custom" onClick={() => openModal()}>
+                <i className="bi bi-plus-lg me-1"></i>Nova categoria
+              </button>
+            </div>
+
+            <div className="card-section">
+              <div className="d-flex gap-2 mb-3">
+                {['ALL','RECEITA','DESPESA'].map(f => (
+                  <button key={f}
+                    className={`btn btn-sm ${filter === f ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                    onClick={() => setFilter(f)}>
+                    {f === 'ALL' ? 'Todas' : f === 'RECEITA' ? 'Receitas' : 'Despesas'}
+                  </button>
+                ))}
+              </div>
+
+              {loading ? (
+                <div className="text-center py-4">
+                  <div className="spinner-border" style={{ color: 'var(--color-accent)' }}></div>
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="text-center py-5 text-muted">
+                  <i className="bi bi-tag fs-1 d-block mb-2"></i>
+                  <p>Nenhuma categoria encontrada</p>
+                  <button className="btn btn-primary-custom mt-2" onClick={() => openModal()}>Criar categoria</button>
+                </div>
+              ) : (
+                <div className="row g-3">
+                  {filtered.map(c => (
+                    <div key={c.id} className="col-sm-6 col-md-4 col-lg-3">
+                      <div className="card border-0 shadow-sm h-100" style={{ borderRadius: 12 }}>
+                        <div className="card-body d-flex align-items-center gap-3 py-3">
+                          <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style={{ width: 44, height: 44, background: c.cor || '#0426b0' }}>
+                            <i className={`bi ${c.icone || 'bi-tag'} text-white`}></i>
+                          </div>
+                          <div className="flex-grow-1 overflow-hidden">
+                            <div className="fw-semibold text-truncate">{c.nome}</div>
+                            <span className={`badge rounded-pill small ${c.tipo === 'RECEITA' ? 'badge-income' : 'badge-expense'}`}>
+                              {c.tipo === 'RECEITA' ? 'Receita' : 'Despesa'}
+                            </span>
+                          </div>
+                          <div className="d-flex flex-column gap-1">
+                            <button className="btn btn-sm btn-outline-secondary p-1" onClick={() => openModal(c)}>
+                              <i className="bi bi-pencil"></i>
+                            </button>
+                            <button className="btn btn-sm btn-outline-danger p-1" onClick={() => handleDelete(c.id)}>
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {ReactDOM.createPortal(
+              <div>
+                <div className="modal-header modal-header-custom">
+                  <h5 className="modal-title">{editId ? 'Editar categoria' : 'Nova categoria'}</h5>
+                  <button type="button" className="btn-close" data-bs-dismiss="modal" style={{ filter: 'invert(1)' }}></button>
+                </div>
+                <form onSubmit={handleSave}>
+                  <div className="modal-body">
+                    {error && <div className="alert alert-danger py-2">{error}</div>}
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Nome</label>
+                      <input className="form-control" type="text" maxLength={80} required
+                        value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} />
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Tipo</label>
+                      <div className="d-flex gap-3">
+                        {['DESPESA','RECEITA'].map(tp => (
+                          <div key={tp} className="form-check">
+                            <input className="form-check-input" type="radio" name="catType"
+                              id={`catType_${tp}`} value={tp} checked={form.tipo === tp}
+                              onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))} />
+                            <label className="form-check-label" htmlFor={`catType_${tp}`}>
+                              {tp === 'RECEITA' ? 'Receita' : 'Despesa'}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Cor</label>
+                      <div className="d-flex gap-2 flex-wrap">
+                        {CAT_COLORS.map(cor => (
+                          <button key={cor} type="button" onClick={() => setForm(f => ({ ...f, cor }))}
+                            style={{ width: 32, height: 32, background: cor, border: 'none', borderRadius: '50%',
+                              cursor: 'pointer', outline: form.cor === cor ? `3px solid ${cor}` : 'none', outlineOffset: 2 }} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-semibold">Ícone</label>
+                      <div className="d-flex gap-2 flex-wrap">
+                        {CAT_ICONS.map(icon => (
+                          <button key={icon.v} type="button" title={icon.l}
+                            onClick={() => setForm(f => ({ ...f, icone: icon.v }))}
+                            className={`btn btn-sm ${form.icone === icon.v ? 'btn-primary-custom' : 'btn-outline-secondary'}`}
+                            style={{ width: 40, height: 40 }}>
+                            <i className={`bi ${icon.v}`}></i>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                      <div className="rounded-circle d-flex align-items-center justify-content-center"
+                        style={{ width: 40, height: 40, background: form.cor }}>
+                        <i className={`bi ${form.icone} text-white`}></i>
+                      </div>
+                      <span className="fw-semibold">{form.nome || 'Prévia'}</span>
+                    </div>
+                  </div>
+                  <div className="modal-footer">
+                    <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" className="btn btn-primary-custom" disabled={saving}>
+                      {saving ? <span className="spinner-border spinner-border-sm"></span> : 'Salvar'}
+                    </button>
+                  </div>
+                </form>
+              </div>,
+              document.getElementById('catModalContent')
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // PERFIL DE INVESTIDOR
+    // ════════════════════════════════════════════════════════════════
+    function DetailModal({ item, color, onClose }) {
+      if (!item) return null;
+      const paragraphs = item.detail ? item.detail.split('\n\n') : [];
+      return (
+        <div className="detail-modal-backdrop" onClick={onClose}>
+          <div className="detail-modal-box fade-in" onClick={e => e.stopPropagation()}>
+            <div className="detail-modal-header" style={{ background: color }}>
+              {item.icon && <i className={`bi ${item.icon} detail-modal-hicon`}></i>}
+              <div className="flex-grow-1">
+                <div className="detail-modal-title">{item.name || item.label}</div>
+                {item.desc && <div className="detail-modal-sub">{item.desc}</div>}
+              </div>
+              <button className="detail-modal-close" onClick={onClose}>
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div className="detail-modal-body">
+              {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+              {item.method && (
+                <div className="detail-method-section">
+                  <div className="detail-method-title" style={{ color }}>
+                    <i className="bi bi-search me-2"></i>Como identificar um bom produto
+                  </div>
+                  <p>{item.method}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AllocationChecklist({ allocation, riskProfile }) {
+      const storageKey = `pragfy_alloc_${user.id}_${riskProfile}`;
+      const [checked, setChecked] = useState(() => {
+        try { return JSON.parse(localStorage.getItem(storageKey) || '{}'); }
+        catch { return {}; }
+      });
+      function toggle(label) {
+        setChecked(prev => {
+          const next = { ...prev, [label]: !prev[label] };
+          localStorage.setItem(storageKey, JSON.stringify(next));
+          return next;
+        });
+      }
+      const done = allocation.filter(a => checked[a.label]).length;
+      return (
+        <div>
+          <div className="alloc-bar mb-3">
+            {allocation.map(a => (
+              <div key={a.label} style={{ width: `${a.pct}%`, background: a.color,
+                opacity: checked[a.label] ? 1 : 0.35, transition: 'opacity 0.3s' }}
+                title={`${a.label}: ${a.pct}%`} />
+            ))}
+          </div>
+          <div className="d-flex flex-column gap-2">
+            {allocation.map(a => (
+              <label key={a.label} className={`alloc-check-row ${checked[a.label] ? 'alloc-check-row--done' : ''}`}
+                onClick={() => toggle(a.label)}>
+                <span className="alloc-dot" style={{ background: a.color }} />
+                <span className="alloc-label">{a.label}</span>
+                <span className="alloc-pct">{a.pct}%</span>
+                <span className={`alloc-checkbox ${checked[a.label] ? 'alloc-checkbox--checked' : ''}`}
+                  style={{ '--chk-color': a.color }}>
+                  {checked[a.label] && <i className="bi bi-check-lg"></i>}
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className="alloc-progress-label">{done} de {allocation.length} alocações concluídas</div>
+        </div>
+      );
+    }
+
+    function ProfileResult({ saved, onRedo }) {
+      const [selected, setSelected] = useState(null);
+      const data = PROFILE_DATA[saved.perfilRisco];
+      if (!data) return null;
+      const tagColors = { Essencial: '#1d9e63', Recomendado: '#0426b0', Complementar: '#d97706', Opcional: '#8b5cf6' };
+      return (
+        <div className="fade-in">
+          {selected && <DetailModal item={selected} color={data.color} onClose={() => setSelected(null)} />}
+          <div className={`profile-hero profile-hero--${data.cls} mb-4`}>
+            <div className="d-flex align-items-center gap-3 mb-3">
+              <div className="profile-hero-icon"><i className={`bi ${data.icon}`}></i></div>
+              <div>
+                <div className="profile-hero-label">Seu perfil de investidor</div>
+                <div className="profile-hero-name">{saved.perfilRisco.charAt(0) + saved.perfilRisco.slice(1).toLowerCase()}</div>
+                <div className="profile-hero-tagline">{data.tagline}</div>
+              </div>
+            </div>
+            <p className="profile-hero-desc">{data.desc}</p>
+            <button className="btn btn-sm btn-outline-light mt-1" onClick={onRedo}>
+              <i className="bi bi-arrow-repeat me-1"></i>Refazer questionário
+            </button>
+          </div>
+          <div className="row g-4">
+            <div className="col-lg-6">
+              <div className="card-section h-100">
+                <h2 className="section-title">
+                  <i className="bi bi-pie-chart me-2" style={{ color: data.color }}></i>Alocação sugerida
+                </h2>
+                <AllocationChecklist allocation={data.allocation} riskProfile={saved.perfilRisco} />
+              </div>
+            </div>
+            <div className="col-lg-6">
+              <div className="card-section h-100">
+                <h2 className="section-title">
+                  <i className="bi bi-star me-2" style={{ color: data.color }}></i>Produtos recomendados
+                  <span className="ms-2" style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--text-muted)' }}>clique para saber mais</span>
+                </h2>
+                <div className="d-flex flex-column gap-2">
+                  {data.products.map(p => (
+                    <div key={p.name} className="product-row product-row--clickable" onClick={() => setSelected(p)}>
+                      <div className="product-icon" style={{ background: data.color + '22', color: data.color }}>
+                        <i className={`bi ${p.icon}`}></i>
+                      </div>
+                      <div className="flex-grow-1 overflow-hidden">
+                        <div className="d-flex align-items-center gap-2">
+                          <span className="product-name">{p.name}</span>
+                          <span className="product-tag" style={{ background: tagColors[p.tag] + '22', color: tagColors[p.tag] }}>{p.tag}</span>
+                        </div>
+                        <div className="product-desc">{p.desc}</div>
+                      </div>
+                      <i className="bi bi-chevron-right product-chevron"></i>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="col-12">
+              <div className="card-section">
+                <h2 className="section-title">
+                  <i className="bi bi-list-check me-2" style={{ color: data.color }}></i>Primeiros passos
+                  <span className="ms-2" style={{ fontSize: '0.72rem', fontWeight: 400, color: 'var(--text-muted)' }}>clique para saber mais</span>
+                </h2>
+                <div className="d-flex flex-column gap-2">
+                  {data.steps.map((step, i) => (
+                    <div key={i} className="step-row step-row--clickable" onClick={() => setSelected(step)}>
+                      <div className="step-num" style={{ background: data.color }}>{i + 1}</div>
+                      <p className="step-text">{step.desc}</p>
+                      <i className="bi bi-chevron-right product-chevron ms-2"></i>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Questionnaire({ onDone }) {
+      const [step,    setStep]    = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [saving,  setSaving]  = useState(false);
+
+      const q        = QUESTIONS[step];
+      const total    = QUESTIONS.length;
+      const progress = Math.round((step / total) * 100);
+      const selected = answers[q.id] || null;
+
+      function choose(v) {
+        const next = { ...answers, [q.id]: v };
+        setAnswers(next);
+        if (step < total - 1) setTimeout(() => setStep(s => s + 1), 120);
+      }
+
+      async function handleFinish() {
+        setSaving(true);
+        try {
+          const data = await api.post('/profile', { idUsuario: user.id, respostas: answers });
+          onDone(data);
+        } finally { setSaving(false); }
+      }
+
+      const isLast      = step === total - 1;
+      const allAnswered = QUESTIONS.every(q => answers[q.id]);
+
+      return (
+        <div className="quiz-wrap fade-in">
+          <div className="quiz-progress mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-muted" style={{ fontSize: '0.82rem' }}>Pergunta {step+1} de {total}</span>
+              <span className="fw-semibold" style={{ color: 'var(--color-accent)', fontSize: '0.82rem' }}>{progress}%</span>
+            </div>
+            <div className="quiz-bar-track"><div className="quiz-bar-fill" style={{ width: `${progress}%` }} /></div>
+            <div className="quiz-dots">
+              {QUESTIONS.map((_, i) => (
+                <div key={i} className={`quiz-dot ${i < step ? 'done' : i === step ? 'current' : ''}`} />
+              ))}
+            </div>
+          </div>
+          <div className="quiz-card">
+            <div className="quiz-q-icon"><i className={`bi ${q.icon}`}></i></div>
+            <h3 className="quiz-question">{q.label}</h3>
+            <div className="d-flex flex-column gap-2 mt-4">
+              {q.options.map(opt => (
+                <button key={opt.v}
+                  className={`quiz-option ${selected === opt.v ? 'selected' : ''}`}
+                  onClick={() => choose(opt.v)}>
+                  <span className="quiz-option-check">
+                    {selected === opt.v
+                      ? <i className="bi bi-check-circle-fill"></i>
+                      : <i className="bi bi-circle"></i>}
+                  </span>
+                  {opt.l}
+                </button>
+              ))}
+            </div>
+            <div className="d-flex justify-content-between align-items-center mt-4">
+              <button className="btn btn-outline-secondary btn-sm" onClick={() => step > 0 && setStep(s => s-1)} disabled={step === 0}>
+                <i className="bi bi-chevron-left me-1"></i>Anterior
+              </button>
+              {isLast ? (
+                <button className="btn btn-primary-custom px-4"
+                  disabled={saving || !allAnswered} onClick={handleFinish}>
+                  {saving
+                    ? <span className="spinner-border spinner-border-sm"></span>
+                    : <><i className="bi bi-check-circle me-2"></i>Ver meu perfil</>}
+                </button>
+              ) : (
+                <button className="btn btn-primary-custom btn-sm"
+                  disabled={!selected} onClick={() => setStep(s => s+1)}>
+                  Próxima<i className="bi bi-chevron-right ms-1"></i>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function InvestorProfile() {
+      const [saved,    setSaved]    = useState(null);
+      const [loading,  setLoading]  = useState(true);
+      const [showForm, setShowForm] = useState(false);
+
+      useEffect(() => {
+        api.get(`/profile?idUsuario=${user.id}`)
+          .then(data => { setSaved(data); setShowForm(false); })
+          .catch(() => setShowForm(true))
+          .finally(() => setLoading(false));
+      }, []);
+
+      if (loading) return (
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content d-flex align-items-center justify-content-center">
+            <div className="spinner-border" style={{ color: 'var(--color-accent)' }}></div>
+          </main>
+        </div>
+      );
+
+      return (
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main-content">
+            <div className="page-header">
+              <h1 className="page-title">Perfil de Investidor</h1>
+              <p className="page-subtitle">
+                {showForm ? 'Responda as perguntas para descobrir seu perfil' : 'Seu relatório personalizado de investimentos'}
+              </p>
+            </div>
+            {showForm
+              ? <Questionnaire onDone={data => { setSaved(data); setShowForm(false); }} />
+              : <ProfileResult saved={saved} onRedo={() => { setSaved(null); setShowForm(true); }} />}
+          </main>
+        </div>
+      );
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    // APP — Roteador raiz
+    // ════════════════════════════════════════════════════════════════
+    function App() {
+      const route = useRoute();
+
+      const ROUTES = {
+        '#/dashboard':    <Dashboard />,
+        '#/transactions': <Transactions />,
+        '#/categories':   <Categories />,
+        '#/profile':      <InvestorProfile />,
+      };
+
+      return ROUTES[route] ?? <NotFound />;
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
