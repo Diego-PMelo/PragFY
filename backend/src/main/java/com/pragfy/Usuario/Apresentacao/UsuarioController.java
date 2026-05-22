@@ -1,5 +1,6 @@
 package com.pragfy.Usuario.Apresentacao;
 
+import com.pragfy.Usuario.Aplicacao.DTO.AtualizarUsuarioRequestDTO;
 import com.pragfy.Usuario.Aplicacao.DTO.LoginRequestDTO;
 import com.pragfy.Usuario.Aplicacao.DTO.RegistroRequestDTO;
 import com.pragfy.Usuario.Aplicacao.DTO.UsuarioResponseDTO;
@@ -30,5 +31,17 @@ public class UsuarioController {
     @GetMapping("/users/{id}")
     public UsuarioResponseDTO BuscarPorId(@PathVariable Long id) {
         return usuarioService.BuscarPorId(id);
+    }
+
+    @PutMapping("/users/{id}")
+    public UsuarioResponseDTO Atualizar(@PathVariable Long id,
+                                        @Valid @RequestBody AtualizarUsuarioRequestDTO requisicao) {
+        return usuarioService.Atualizar(id, requisicao);
+    }
+
+    @DeleteMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void Excluir(@PathVariable Long id) {
+        usuarioService.Excluir(id);
     }
 }

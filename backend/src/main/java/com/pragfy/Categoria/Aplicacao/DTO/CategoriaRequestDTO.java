@@ -11,7 +11,7 @@ public record CategoriaRequestDTO(
         @NotBlank(message = "Nome é obrigatório")
         String nome,
 
-        @NotNull(message = "Tipo é obrigatório (INCOME ou EXPENSE)")
+        @NotNull(message = "Tipo é obrigatório (RECEITA ou DESPESA)")
         ECategoriaTipo tipo,
 
         String cor,

@@ -106,6 +106,28 @@ public class PerfilInvestidorService {
         return EPerfilRisco.CONSERVADOR;
     }
 
+    public PerfilResponseDTO Atualizar(Long idUsuario, PerfilRequestDTO requisicao) {
+        PerfilInvestidorEntity perfil = perfilRepository.BuscarPorIdUsuario(idUsuario)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Perfil não encontrado — use POST para criar"));
+
+        String respostasJson = SerializarRespostas(requisicao);
+        EPerfilRisco perfilRisco = requisicao.perfilRisco() != null
+                ? requisicao.perfilRisco()
+                : CalcularPerfilRisco(requisicao.respostas());
+
+        perfil.setRespostas(respostasJson);
+        perfil.setPerfilRisco(perfilRisco);
+
+        return PerfilResponseDTO.De(perfilRepository.save(perfil));
+    }
+
+    public void Excluir(Long idUsuario) {
+        PerfilInvestidorEntity perfil = perfilRepository.BuscarPorIdUsuario(idUsuario)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Perfil não encontrado"));
+        perfilRepository.delete(perfil);
+    }
+
     private String SerializarRespostas(PerfilRequestDTO requisicao) {
         try {
             return objectMapper.writeValueAsString(requisicao.respostas());

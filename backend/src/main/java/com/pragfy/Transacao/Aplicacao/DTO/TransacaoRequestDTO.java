@@ -21,6 +21,6 @@ public record TransacaoRequestDTO(
         @NotNull(message = "Data é obrigatória")
         LocalDate data,
 
-        @NotNull(message = "Tipo é obrigatório (INCOME ou EXPENSE)")
+        @NotNull(message = "Tipo é obrigatório (RECEITA ou DESPESA)")
         ETransacaoTipo tipo
 ) {}
