@@ -31,7 +31,7 @@ public class TransacaoEntity {
     @Column(name = "DS_DESCRICAO", length = 255)
     private String descricao;
 
-    @Column(name = "DT_DATA", nullable = false)
+    @Column(name = "DT_TRANSACAO", nullable = false)
     private LocalDate data;
 
     @Enumerated(EnumType.STRING)

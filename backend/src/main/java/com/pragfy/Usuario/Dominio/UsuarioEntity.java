@@ -23,7 +23,7 @@ public class UsuarioEntity {
     @Column(name = "DS_SENHA", nullable = false, length = 255)
     private String senha;
 
-    @Column(name = "DT_CRIADO_EM", nullable = false, updatable = false)
+    @Column(name = "DT_REGISTRO", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
 
     @PrePersist

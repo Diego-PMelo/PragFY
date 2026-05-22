@@ -27,7 +27,7 @@ public class PerfilInvestidorEntity {
     @Column(name = "DS_RESPOSTAS", columnDefinition = "CLOB")
     private String respostas;
 
-    @Column(name = "DT_ATUALIZADO_EM")
+    @Column(name = "DT_REGISTRO_ALT")
     private LocalDateTime atualizadoEm;
 
     @PrePersist
