@@ -1,7 +1,6 @@
 package com.pragfy.Compartilhado.Config;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
@@ -11,18 +10,13 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 
 /**
- * Gerencia o ciclo de vida do banco de dados da aplicação.
+ * Inicializa o banco de dados ao subir a aplicação.
  *
  * <p>Fluxo na inicialização:
  * <ol>
- *   <li>Dispose — remove tabelas de uma execução anterior interrompida (erros ignorados)</li>
+ *   <li>Dispose — remove tabelas de uma execução anterior (erros ignorados)</li>
  *   <li>DDL     — cria o schema completo</li>
  *   <li>Seed    — popula os dados iniciais</li>
- * </ol>
- *
- * <p>Fluxo no encerramento:
- * <ol>
- *   <li>Dispose — remove todas as tabelas da aplicação</li>
  * </ol>
  */
 @Slf4j
@@ -48,18 +42,6 @@ public class InicializadorBancoDados {
         executarScript("sql/seed.sql", false);
 
         log.info("Banco de dados pronto.");
-        log.info("═══════════════════════════════════════════");
-    }
-
-    @PreDestroy
-    public void destruir() {
-        log.info("═══════════════════════════════════════════");
-        log.info("  PragFY — Executando dispose do banco");
-        log.info("═══════════════════════════════════════════");
-
-        executarScript("sql/dispose.sql", true);
-
-        log.info("Dispose concluído.");
         log.info("═══════════════════════════════════════════");
     }
 
