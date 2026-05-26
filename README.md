@@ -1,187 +1,80 @@
-# PragFY — Gerenciador Financeiro e Planner de Investimentos
+# PragFY
 
-Aplicação web para controle de gastos, gerenciamento de transações e definição de perfil de investidor.
+PragFY é uma aplicação web de gestão financeira pessoal. Com ela é possível registrar receitas e despesas, organizar tudo por categorias e descobrir seu perfil de investidor através de um questionário.
 
 ---
 
 ## Tecnologias utilizadas
 
-| Camada    | Tecnologia                              |
-|-----------|-----------------------------------------|
-| Backend   | Java 17 + Spring Boot 3.3 + Spring Data JPA |
-| Banco     | Oracle Database (instância FIAP)        |
-| Frontend  | React 18 (CDN) + Bootstrap 5 + HTML/CSS/JS |
+**Backend**
+- Java 17
+- Spring Boot
+- Spring Data JPA
+- Oracle Database (instância FIAP)
 
----
-
-## Entidades do sistema
-
-O projeto implementa **4 entidades** mapeadas no banco Oracle:
-
-| Entidade              | Tabela                 | Descrição                                   |
-|-----------------------|------------------------|---------------------------------------------|
-| `UsuarioEntity`       | `TB_USUARIOS`          | Cadastro e autenticação de usuários         |
-| `CategoriaEntity`     | `TB_CATEGORIAS`        | Categorias de receita e despesa por usuário |
-| `TransacaoEntity`     | `TB_TRANSACOES`        | Lançamentos financeiros (entradas/saídas)   |
-| `PerfilInvestidorEntity` | `TB_PERFIS_INVESTIDOR` | Perfil de risco calculado por questionário |
+**Frontend**
+- React (carregado via CDN)
+- Bootstrap 5
+- HTML, CSS e JavaScript
 
 ---
 
 ## Pré-requisitos
 
-- Java 17 ou superior
-- Acesso à instância Oracle da FIAP (credenciais fornecidas pelo curso)
-- Navegador moderno (Chrome, Edge, Firefox)
+Antes de rodar o projeto, você precisa ter instalado na sua máquina:
+
+- **Java 17** — para executar o backend
+- Um navegador moderno como Chrome, Edge ou Firefox — para abrir o frontend
 
 ---
 
-## 1. Configuração do Backend
+## Passo a passo para testar
 
-### 1.1 Configurar o banco de dados
+### 1. Configure o banco de dados
 
-Abra o arquivo:
+O arquivo `backend/src/main/resources/application.properties` contem os dados da instância Oracle da FIAP
 
+Ocorreu de durante os testes eu bloquear o usuario oracle, foi pedido o desbloqueio pelo email.
+
+
+Caso o arquvivo se perca ou fique com os placeholders devido ao git ignore esses são os dados:
 ```
-backend/src/main/resources/application.properties
-```
-
-Preencha os dados da instância Oracle da FIAP:
-
-```properties
-spring.datasource.url=jdbc:oracle:thin:@<HOST>:<PORTA>:<SID>
-spring.datasource.username=<SEU_USUARIO>
-spring.datasource.password=<SUA_SENHA>
+spring.datasource.url=ORACLE.FIAP.COM.BR
+spring.datasource.username=RM568386
+spring.datasource.password=121101
 ```
 
-> O schema (tabelas) e os dados iniciais são criados automaticamente ao iniciar o backend via os scripts `sql/ddl.sql` e `sql/seed.sql`.
 
-### 1.2 Executar o Backend
+### 2. Suba o backend
 
-Na pasta `backend/`, execute:
+Abra um terminal na pasta `backend` e execute:
 
-**Com Maven Wrapper (sem precisar instalar o Maven):**
-
-```bash
-# Linux / macOS
-./mvnw spring-boot:run
-
-# Windows (PowerShell ou CMD)
+```
 .\mvnw.cmd spring-boot:run
 ```
 
-**Com Maven instalado:**
+Aguarde até aparecer a mensagem `Started PragfyApplication` no terminal. Isso indica que o servidor está rodando na porta 8080.
 
-```bash
-mvn spring-boot:run
-```
+> Quando o backend inicia, ele cria as tabelas no banco e já popula com dados de exemplo automaticamente.
 
-O servidor inicia na porta **8080**: `http://localhost:8080`
+### 3. Abra o frontend
 
----
+Com o backend rodando, abra o arquivo `frontend/index.html` diretamente no navegador.
 
-## 2. Execução do Frontend
+### 4. Faça login
 
-O frontend é uma SPA em React (via CDN) — não requer Node.js nem npm.
+Use as credenciais do usuário de teste:
 
-### Opção A — VS Code Live Server (recomendado)
-
-1. Instale a extensão **Live Server** no VS Code
-2. Clique com o botão direito em `frontend/index.html`
-3. Selecione **"Open with Live Server"**
-4. O navegador abrirá em `http://127.0.0.1:5500/frontend/index.html`
-
-### Opção B — Python (servidor local)
-
-```bash
-# Na raiz do projeto
-python -m http.server 5500
-```
-
-Acesse: `http://localhost:5500/frontend/index.html`
-
-### Opção C — Abrir diretamente no navegador
-
-Basta abrir o arquivo `frontend/index.html` diretamente no navegador.
+- **E-mail:** diego@pragfy.com
+- **Senha:** 123456
 
 ---
 
-## 3. Dados de autenticação do usuário de teste
+## O que você pode testar
 
-| Campo  | Valor              |
-|--------|--------------------|
-| E-mail | `diego@pragfy.com` |
-| Senha  | `123456`           |
+Após fazer login, você terá acesso a quatro áreas da aplicação:
 
-> Este usuário é criado automaticamente pelo script `seed.sql` ao iniciar o backend.
-> Ele já vem com categorias e transações de exemplo para o mês de maio/2026.
-
----
-
-## 4. Endpoints da API
-
-### Usuários — `/api/auth`
-
-| Método | Rota             | Descrição           |
-|--------|------------------|---------------------|
-| POST   | `/register`      | Cadastrar usuário   |
-| POST   | `/login`         | Autenticar usuário  |
-| GET    | `/users/{id}`    | Buscar usuário      |
-| PUT    | `/users/{id}`    | Atualizar usuário   |
-| DELETE | `/users/{id}`    | Remover usuário     |
-
-### Categorias — `/api/categories`
-
-| Método | Rota       | Descrição                         |
-|--------|------------|-----------------------------------|
-| GET    | `/`        | Listar categorias (`?idUsuario=`) |
-| POST   | `/`        | Criar categoria                   |
-| PUT    | `/{id}`    | Atualizar categoria               |
-| DELETE | `/{id}`    | Remover categoria                 |
-
-### Transações — `/api/transactions`
-
-| Método | Rota         | Descrição                                      |
-|--------|--------------|------------------------------------------------|
-| GET    | `/`          | Listar por usuário/mês/ano                     |
-| GET    | `/summary`   | Resumo mensal (receitas, despesas, saldo)      |
-| POST   | `/`          | Criar transação                                |
-| PUT    | `/{id}`      | Atualizar transação                            |
-| DELETE | `/{id}`      | Remover transação                              |
-
-### Perfil do Investidor — `/api/profile`
-
-| Método | Rota            | Descrição              |
-|--------|-----------------|------------------------|
-| GET    | `/`             | Buscar perfil          |
-| POST   | `/`             | Criar perfil           |
-| PUT    | `/{idUsuario}`  | Atualizar perfil       |
-| DELETE | `/{idUsuario}`  | Remover perfil         |
-
----
-
-## 5. Estrutura do projeto
-
-```
-PragFY/
-├── backend/                          # Spring Boot REST API
-│   ├── src/main/java/com/pragfy/
-│   │   ├── Categoria/               # CRUD de categorias
-│   │   ├── Transacao/               # CRUD de transações
-│   │   ├── Usuario/                 # Autenticação e usuários
-│   │   ├── PerfilInvestidor/        # Questionário e perfil de risco
-│   │   └── Compartilhado/           # CORS, inicialização do BD, exceções
-│   └── src/main/resources/
-│       ├── application.properties   # Configuração do banco
-│       └── sql/
-│           ├── ddl.sql              # Criação das tabelas
-│           ├── seed.sql             # Dados iniciais
-│           └── dispose.sql          # Remoção das tabelas
-│
-└── frontend/                        # SPA React (sem Node.js)
-    ├── index.html                   # Tela de login
-    ├── register.html                # Tela de cadastro
-    ├── app.html                     # Aplicação principal (SPA)
-    ├── styles.css                   # Estilos globais
-    ├── components/                  # Componentes React
-    └── services/                    # Serviços (API, storage, utils)
-```
+- **Dashboard** — visão geral do mês com resumo de receitas, despesas e saldo
+- **Transações** — cadastro, edição e exclusão de lançamentos financeiros
+- **Categorias** — criação e gerenciamento de categorias personalizadas
+- **Perfil de Investidor** — questionário que identifica seu perfil de risco e sugere investimentos
