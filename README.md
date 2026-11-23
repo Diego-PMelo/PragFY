@@ -58,8 +58,7 @@ js/screens.js         todas as telas e as regras (simulação de dívidas, metas
 js/app.js             roteador por hash, estado e eventos
 assets/               logo
 prints/               prints das telas usados na entrega
-entrega/              PDF da atividade de prototipação
-ferramentas/          scripts para refazer os prints (shots.ps1) e o PDF (fill_template.py)
+ferramentas/          scripts para refazer os prints (shots.ps1) e o PDF da entrega em entrega/, fora do Git (fill_template.py)
 ```
 
 **Modo de captura:** `?shot=1&p=maria#/plano` abre a tela sem moldura e sem animações. Parâmetros extras: `scroll`, `c`, `open` e `ask`.

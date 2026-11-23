@@ -1,8 +1,5 @@
-# Arquivos gerados na montagem da entrega
-entrega/site/
-entrega/tpl/
-entrega/*.zip
-entrega/*.docx
+# Arquivos da entrega (template, PDF e site) ficam só na máquina
+entrega/
 
 # Ambiente local
 .claude/
