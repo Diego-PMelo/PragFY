@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>PragFy · Protótipo navegável</title>
+  <meta name="description" content="Protótipo navegável do PragFy — Startup One FIAP. Feito para a realidade brasileira: Open Finance, IA que analisa gastos, plano para sair das dívidas, criar uma reserva ou investir.">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/v2.css">
+  <link rel="stylesheet" href="css/v3.css">
+</head>
+<body>
+  <main class="stage">
+    <section class="intro">
+      <span class="tag">Startup One · FIAP · Protótipo</span>
+      <h1><img src="assets/logo.svg" alt="">PragFy</h1>
+      <p class="pitch">
+        Feito para a <b>realidade brasileira</b>: a maioria não tem sobra no fim do mês e muitos estão endividados.
+        O PragFy conecta as contas via <b>Open Finance</b>, usa <b>IA para entender a situação real</b>, mostra
+        <b>onde dá para economizar</b> e monta o plano da sua fase — <b>sair das dívidas, criar um colchão ou investir</b>.
+      </p>
+      <h3>Veja o app como</h3>
+      <div class="persona-pick">
+        <button data-action="persona" data-v="maria"><span class="pav" style="background:linear-gradient(135deg,#f97316,#e05252)">M</span><span><b>Maria</b><small>Fase 1 · Sair do vermelho</small></span></button>
+        <button data-action="persona" data-v="ana"><span class="pav" style="background:linear-gradient(135deg,#f59e0b,#d97706)">A</span><span><b>Ana</b><small>Fase 2 · Criar um colchão</small></span></button>
+        <button data-action="persona" data-v="diego"><span class="pav" style="background:linear-gradient(135deg,#3355ff,#8b5cf6)">D</span><span><b>Diego</b><small>Fase 3 · Investir</small></span></button>
+      </div>
+      <h3>Pule direto para uma tela</h3>
+      <nav class="jump">
+        <a href="#/onboarding/1"><i class="bi bi-collection"></i> Onboarding</a>
+        <a href="#/conectar"><i class="bi bi-bank2"></i> Open Finance</a>
+        <a href="#/diagnostico/3"><i class="bi bi-credit-card"></i> Diagnóstico: dívidas</a>
+        <a href="#/diagnostico/7"><i class="bi bi-chat-quote"></i> Texto livre (IA)</a>
+        <a href="#/situacao"><i class="bi bi-stars"></i> Leitura da IA</a>
+        <a href="#/plano"><i class="bi bi-signpost-split"></i> Plano da fase</a>
+        <a href="#/economias"><i class="bi bi-scissors"></i> Economias (IA)</a>
+        <a href="#/negociar"><i class="bi bi-chat-left-text"></i> Renegociar</a>
+        <a href="#/classificar"><i class="bi bi-tags"></i> A classificar</a>
+        <a href="#/inicio"><i class="bi bi-house"></i> Início</a>
+        <a href="#/transacoes"><i class="bi bi-arrow-left-right"></i> Gastos</a>
+        <a href="#/aprender"><i class="bi bi-book"></i> Aprender</a>
+        <a href="#/classe/credito"><i class="bi bi-credit-card-2-front"></i> Dívidas e crédito</a>
+        <a href="#/analise"><i class="bi bi-calendar-check"></i> Análises mensais</a>
+      </nav>
+      <p class="foot">O PragFy não indica produtos financeiros: mostra proporções, caminhos e explicações.<br>
+        Protótipo de média fidelidade · dados e bancos fictícios · nenhuma informação é enviada.<br>
+        Diego Pinheiro de Melo · Grupo 65 · 2TDS · Fase 4</p>
+    </section>
+
+    <div class="phone">
+      <div class="app" id="app">
+        <div class="statusbar"><span>9:41</span><span class="icons"><i class="bi bi-reception-4"></i><i class="bi bi-wifi"></i><i class="bi bi-battery-full"></i></span></div>
+        <div id="screen"></div>
+        <nav class="tabbar" id="tabbar">
+          <button data-tab="inicio"><i class="bi bi-house-door-fill"></i>Início</button>
+          <button data-tab="transacoes" class="pill"><i class="bi bi-arrow-left-right"></i>Gastos<span class="tbadge"></span></button>
+          <button data-tab="plano" class="pill"><i class="bi bi-signpost-split-fill"></i>Plano<span class="dot"></span></button>
+          <button data-tab="aprender"><i class="bi bi-book"></i>Aprender</button>
+          <button data-tab="conta"><i class="bi bi-person-circle"></i>Conta</button>
+        </nav>
+        <div id="overlay"></div>
+        <div id="toast"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/credito.js"></script>
+  <script src="js/personas.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

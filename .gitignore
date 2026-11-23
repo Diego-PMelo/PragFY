@@ -1,19 +1,13 @@
-# Credenciais e configurações sensíveis
-backend/src/main/resources/application.properties
+# Arquivos gerados na montagem da entrega
+entrega/site/
+entrega/tpl/
+entrega/*.zip
+entrega/*.docx
 
-# Build
-backend/target/
-frontend/node_modules/
-frontend/dist/
-
-# IDE
-.idea/
-*.iml
+# Ambiente local
+.claude/
 .vscode/
-.classpath
-.project
-.settings/
-
-# OS
-.DS_Store
+.idea/
+*.log
 Thumbs.db
+.DS_Store
