@@ -166,7 +166,7 @@ const Screens = {
   onboarding(s, p) {
     const n = Math.min(Math.max(parseInt(p[0] || '1', 10), 1), 3);
     const slides = [
-      { icon: 'bi-calendar-x', title: 'O mês acaba antes do salário?',
+      { icon: 'bi-calendar-x', title: 'O salário acaba antes do mês?',
         text: 'Você não está sozinho: boa parte dos brasileiros fecha o mês no vermelho ou com dívidas. O PragFy foi feito para essa realidade.',
         floats: [['top:18px;left:-14px', 'bi-credit-card', '#e05252', 'Rotativo do cartão'], ['bottom:34px;right:-22px', 'bi-bank', '#f59e0b', 'Cheque especial'], ['top:96px;right:-30px', 'bi-receipt', '#8b5cf6', 'Carnê']] },
       { icon: 'bi-bank2', title: 'Conecte seus bancos com o Open Finance',

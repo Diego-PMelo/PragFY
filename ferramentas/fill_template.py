@@ -23,14 +23,15 @@ SECOES = [
     ('O problema', [
         'Segundo a CNC (Peic, julho de 2026), 82% das famílias brasileiras têm dívidas, e o cartão de crédito aparece em 85% '
         'delas; entre as que ganham até 3 salários mínimos, 38,5% estão com contas em atraso. A Serasa contou 84,2 milhões de '
-        'inadimplentes em setembro de 2026, mais da metade dos adultos. Essas pessoas pagam juros de cerca de 13% ao mês no '
-        'rotativo, pagam só o mínimo e não sabem para onde vai o próprio dinheiro. Os apps de finanças, porém, partem de quem '
-        'já tem sobra e sugerem investir para quem ainda paga mais de juros do que qualquer aplicação renderia.',
+        'inadimplentes em setembro de 2026, mais da metade dos adultos. Para muitos, o salário acaba antes do mês: o cartão e o cheque especial cobrem a diferença, '
+        'o rotativo cobra cerca de 13% ao mês e, pagando só o mínimo, a dívida não para de crescer. A maioria dos apps de '
+        'finanças, porém, parte de quem já tem sobra e fala em investir com quem ainda paga mais de juros do que qualquer '
+        'aplicação renderia.',
     ]),
     ('A solução', [
-        '• Open Finance: saldos, gastos, receitas e as dívidas reais, com seus juros, entram sozinhos. Toda movimentação precisa '
+        '• Open Finance: saldos, gastos, receitas e as dívidas reais, com seus juros, entram automaticamente. Toda movimentação precisa '
         'de categoria; o que chega sem uma vira uma notificação para o usuário classificar, com a sugestão da IA.',
-        '• IA: interpreta o diagnóstico e o relato da pessoa com as próprias palavras, analisa os gastos e mostra onde dá para '
+        '• IA: interpreta o diagnóstico e o relato que a pessoa escreve com as próprias palavras, analisa os gastos e mostra onde dá para '
         'economizar sem cortar o essencial. Todo mês relê os dados e refina o plano.',
         '• Plano por fase: na fase 1, sair do vermelho, o app diz claramente que não é hora de investir e simula a quitação mês '
         'a mês; na fase 2, criar um colchão, monta a reserva em metas; na fase 3, investir, mostra a proporção da carteira por classe.',
@@ -49,19 +50,19 @@ SECOES = [
 ]
 
 SHOTS = [
-    ('01-onboarding-problema', 'Onboarding: o problema', 'Abre pela dor da maioria: o mês que acaba antes do salário, com cartão, carnê e cheque especial. Quem está no vermelho se reconhece no app.'),
-    ('02-onboarding-fases', 'Onboarding: as fases', 'Apresenta a proposta: um plano para a fase de cada um. Sair das dívidas vem antes do colchão, e investir só entra quando sobra dinheiro.'),
+    ('01-onboarding-problema', 'Onboarding: o problema', 'Abre pela dor da maioria: o salário que acaba antes do mês, coberto por cartão, carnê e cheque especial. Quem está no vermelho se reconhece no app.'),
+    ('02-onboarding-fases', 'Onboarding: as fases', 'Apresenta a proposta: um plano para a fase de cada um. Sair das dívidas vem antes do colchão, e investir só entra depois, com sobra e reserva.'),
     ('03-consentimento', 'Open Finance', 'Consentimento no padrão do Open Finance: o usuário escolhe o que compartilhar e por quanto tempo. As operações de crédito revelam as dívidas e os juros.'),
-    ('04-maria-diag-dividas', 'Maria: dívidas encontradas', 'As dívidas chegam pelo Open Finance com os juros ao mês; as caras (rotativo e cheque especial) ficam marcadas. Dá para somar dívidas informais.'),
+    ('04-maria-diag-dividas', 'Maria: dívidas encontradas', 'As dívidas chegam pelo Open Finance com os juros ao mês; as caras (rotativo e cheque especial) ficam marcadas. Dá para somar as que o banco não mostra.'),
     ('05-maria-texto-livre', 'Maria: com as suas palavras', 'Campo livre para contar o que os números não mostram. Maria diz que paga só o mínimo e às vezes aposta para tentar sair das dívidas.'),
     ('06-maria-leitura-ia', 'Maria: leitura da IA', 'A IA cruza números e relato e explica, sem julgamento, por que a dívida não diminui. A conclusão é direta: agora não é hora de investir.'),
     ('07-maria-inicio', 'Maria: início', 'Faltaram R$ 173 no mês, cobertos pelo cheque especial, e R$ 454 foram só de juros. Mostra a fase, o próximo passo e um Pix para classificar.'),
     ('08-maria-classificar', 'A classificar', 'Toda receita e todo gasto precisam de categoria. O que chega sem categoria vira notificação, com a sugestão da IA e a opção de lembrar para as próximas.'),
-    ('09-maria-economias', 'Maria: onde foi o dinheiro', 'Gastos separados em essencial (não é cortado), dá para ajustar, custo do dinheiro, risco (apostas) e dívidas. A IA soma R$ 325/mês de economia.'),
+    ('09-maria-economias', 'Maria: onde foi o dinheiro', 'Gastos separados em essencial (não é cortado), dá para ajustar, custo do dinheiro, risco (apostas) e dívidas. As mudanças escolhidas somam R$ 325/mês.'),
     ('10-maria-economias-cards', 'Maria: sugestões da IA', 'Cada sugestão traz valor atual, meta e dificuldade; o usuário escolhe o que tentar. Apostas vêm sem julgamento, com autoexclusão e apoio do SUS.'),
     ('11-maria-plano', 'Maria: plano de dívidas', 'Simulação mês a mês até zerar as dívidas, refeita com as economias escolhidas. Dá para usar o 13º e escolher: maior juros ou menor dívida primeiro.'),
     ('12-maria-plano-passos', 'Maria: ordem e passos', 'A ordem de pagamento com a data prevista de quitação de cada dívida, os 3 passos (parar, renegociar e quitar) e o que acontece pagando só o mínimo.'),
-    ('13-maria-negociar', 'Renegociar o cartão', 'Guia prático: quanto cabe no bolso, onde negociar, o que pedir (e o CET), direitos do consumidor, mensagem pronta e alerta contra golpes.'),
+    ('13-maria-negociar', 'Renegociar o cartão', 'Guia prático: quanto cabe no bolso, onde negociar, o que pedir e perguntar, os direitos do consumidor, uma mensagem pronta e o alerta contra golpes.'),
     ('14-dividas-e-credito', 'Aprender: dívidas e crédito', 'Cada tipo de dívida em linguagem simples: juros típicos, como funciona, quando pode fazer sentido e as regras, como o teto de juros do rotativo.'),
     ('15-maria-gastos', 'Maria: gastos', 'Extrato único das contas conectadas, com a categoria e o banco de cada lançamento, os totais do mês e o aviso do que falta classificar.'),
     ('16-maria-analises', 'Maria: análises mensais', 'Todo mês a IA relê os dados, registra o que mudou e ajusta o plano. Também avisa o que vai conferir no mês seguinte, como os cortes e o 13º.'),
@@ -69,7 +70,7 @@ SHOTS = [
     ('18-ana-leitura-ia', 'Ana: leitura da IA', 'A IA reconhece o que já está bom (cartão em dia) e explica o risco: sem reserva, qualquer imprevisto vira dívida. A prioridade passa a ser o colchão.'),
     ('19-ana-economias', 'Ana: sugestões da IA', 'Ajustes realistas, como menos delivery e menos streamings. O lazer não é cortado: a sugestão é combinar um teto, para o plano caber na vida real.'),
     ('20-ana-plano-reserva', 'Ana: plano de reserva', 'Reserva em metas: R$ 500, 1 mês e 3 meses de gastos. O prazo de cada meta sai do que sobra somado às economias escolhidas.'),
-    ('21-diego-carteira', 'Diego: carteira', 'Só na fase 3 o app fala de investimento. A sobra do mês é dividida entre completar a reserva de emergência e a carteira de longo prazo.'),
+    ('21-diego-carteira', 'Diego: carteira', 'Só na fase 3 o app monta a carteira. A sobra do mês é dividida entre completar a reserva de emergência e investir no longo prazo.'),
     ('22-diego-carteira-classes', 'Diego: proporções', 'A carteira mostra só a proporção por classe, a partir do perfil e dos objetivos, e explica cada ajuste feito pela IA. Nenhum produto é indicado.'),
     ('23-diego-fiis-opcoes', 'Aprender: FIIs', 'Cada classe traz suas opções explicadas: como rende, risco, liquidez e imposto. Ex.: um FII de desenvolvimento pode passar a obra sem pagar nada.'),
     ('24-diego-fiis-ia', 'Pergunte à IA', 'Perguntas sugeridas e campo livre para tirar dúvidas sobre a classe. A IA explica conceitos e riscos, mas não recomenda produtos.'),
